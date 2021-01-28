@@ -51,3 +51,9 @@ Module.symvers
 Mkfile.old
 dkms.conf
 build.bat
+*.ninja
+*.cmake
+
+# folders
+/build
+/.vscode
