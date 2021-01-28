@@ -57,3 +57,4 @@ build.bat
 # folders
 /build
 /.vscode
+/.cache
