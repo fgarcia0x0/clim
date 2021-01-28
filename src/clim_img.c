@@ -1,9 +1,10 @@
 #include <string.h>
 #include "..\include\clim_img.h"
-#include "..\include\clim_img_utils.h"
+#include "..\include\clim_utils.h"
 
-inline void get_argb_from_pixels(
-	const img_ctx_t* pctx, size_t index, size_t len, argb_t* pout_color
+static inline void get_argb_from_pixels(
+	const img_ctx_t* pctx, size_t index, 
+	size_t len, argb_t* pout_color
 )
 {
 	pout_color->a = pctx->data.pixels[index + len + 0];	
