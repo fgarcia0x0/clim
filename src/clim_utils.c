@@ -116,3 +116,26 @@ clim_err_code_t clim_utf16_to_utf8(
 
   	return CLIM_EC_SUCCESS;
 }
+
+const void* clim_mem_search(const void* haystack, size_t haystack_len, 
+					   		const void* needle, const size_t needle_len) 
+{
+	if (!haystack || !haystack_len || !needle)
+		return NULL;
+
+	if (!needle_len || haystack == needle)
+		return haystack;
+
+	const uint8_t* hptr = (const uint8_t *) haystack;
+	const uint8_t* nptr = (const uint8_t *) needle;
+
+	for (; haystack_len >= needle_len; ++hptr, --haystack_len)
+	{
+		if (!memcmp(hptr, nptr, needle_len))
+		{
+			return hptr;
+		}
+	}
+
+    return NULL;
+}

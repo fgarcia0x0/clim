@@ -31,4 +31,7 @@ clim_err_code_t clim_utf16_to_utf8(
 	size_t* restrict pout_bytes_written
 );
 
+const void* clim_mem_search(const void* haystack, size_t haystack_len, 
+			  	 	  	 	const void* needle, const size_t needle_len);
+
 #endif
