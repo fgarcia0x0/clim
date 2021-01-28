@@ -46,9 +46,19 @@ CLIM_API void clim_log(
 	}
 
 	const char* level_str = GET_LEVEL_STR((int)level);
+	const char* short_filepath = NULL;
+
+	if (!(short_filepath = strrchr(file, '\\')))
+	{
+		short_filepath = strrchr(file, '/');
+	}
+
+	assert(short_filepath);
+	short_filepath++;
+
 	fprintf(stream, "[%s][%s%s%s] %s:%u: ",
 			time_str, start_color, level_str, end_color,
-			strrchr(file, CLIM_BACKSLASH_SYMBOL) + 1, line);
+			short_filepath, line);
 
 	fprintf(stream, "%s", start_color);
 	vfprintf(stream, fmt, list);
