@@ -1,5 +1,5 @@
-#ifndef CLIM_IMG_UTILS_H
-#define CLIM_IMG_UTILS_H
+#ifndef CLIM_UTILS_H
+#define CLIM_UTILS_H
 
 #include "clim_platform_detector.h"
 

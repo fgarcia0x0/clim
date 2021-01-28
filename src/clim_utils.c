@@ -1,4 +1,4 @@
-#include "..\include\clim_img_utils.h"
+#include "..\include\clim_utils.h"
 #include "..\include\clim_mem.h"
 
 uint32_t clim_alpha_blend_pixels(const uint32_t p1, const uint32_t p2)
