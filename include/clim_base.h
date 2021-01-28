@@ -27,6 +27,10 @@
 	#define restrict __restrict
 #endif
 
+#if defined(CLIM_GNU_EXT)
+	#define CLIM_HAVE_MEMMEM
+#endif
+
 // CLIM => COMMAND LINE IMAGE MANIPULATOR
 #define CLIM_API
 

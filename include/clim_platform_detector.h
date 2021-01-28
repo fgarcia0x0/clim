@@ -34,8 +34,14 @@
 	#define CLIM_COMPILER_GCC 1
 #elif defined(_MSC_VER)
 	#define CLIM_COMPILER_MSVC 1
+#elif defined(__GNUC__) && defined(__clang__)
+	#define CLIM_COMPILER_CLANG 1
 #else
 	#error Please add support for your compiler
+#endif
+
+#ifdef _GNU_SOURCE
+	#define CLIM_GNU_EXT 1
 #endif
 
 #if defined(_M_X64) || defined(__x86_64__)
