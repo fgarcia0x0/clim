@@ -15,59 +15,6 @@ uint32_t clim_alpha_blend_pixels(const uint32_t p1, const uint32_t p2)
 	return ((rb & RBMASK) | (ag & AGMASK));
 }
 
-#ifdef CLIM_OS_WIN
-clim_err_code_t clim_convert_wchar_to_utf8(
-	const wchar_t* restrict input, 
-	char** restrict ppdest, 
-	size_t* pout_bytes_written
-) 
-{
-	if (!input || !ppdest)
-		return CLIM_EC_INVALID_PARAMETERS;
-	
-	const size_t input_len = wcslen(input);
-	int size_needed = WideCharToMultiByte(
-		CP_UTF8, 0, input, (int) input_len, NULL, 0, NULL, NULL
-	);
-
-	if (size_needed < 1)
-	{
-		//CLIM_LOG_ERROR("Error to get wide string needed size from conversion");
-		*ppdest = NULL;
-		if (pout_bytes_written) 
-			*pout_bytes_written = 0;
-		return CLIM_EC_UNKNOWN;
-	}
-
-	char* utf8_str = clim_alloc_mem((size_t)size_needed, false);
-
-	int nbytes = WideCharToMultiByte(
-		CP_UTF8, 0, input, (int) input_len, 
-		utf8_str, size_needed, NULL, NULL
-	);
-
-	if (nbytes != size_needed)
-	{
-		clim_release_mem(utf8_str);
-		*ppdest = NULL;
-
-		if (pout_bytes_written) 
-			*pout_bytes_written = (size_t)nbytes;
-
-		//CLIM_LOG_ERROR("[clim_img_utils.c]: error in function \"clim_convert_wchar_to_utf8\", at line: 12 => Error during conversion");
-		// WinGetErrMsg(GetLastError())
-
-		return CLIM_EC_UNKNOWN;
-	}
-
-	*ppdest = utf8_str;
-	if (pout_bytes_written) 
-		*pout_bytes_written = (size_t)nbytes;
-
-	return CLIM_EC_SUCCESS;
-}
-#endif
-
 clim_err_code_t clim_utf16_to_utf8(
 	const char16_t* restrict input, 
 	char* restrict output,

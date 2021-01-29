@@ -5,13 +5,14 @@
 
 #ifdef CLIM_COMPILER_MSVC
 	#pragma once
+	#define _CRT_SECURE_NO_WARNINGS
 #endif
 
 #ifdef CLIM_OS_LINUX
 	#include <linux/limits.h>
 	#define CLIM_MAX_OS_PATH PATH_MAX
 #elif defined(CLIM_OS_WIN)
-	#include <Windows.h>
+	#include <minwindef.h>
 	#define CLIM_MAX_OS_PATH MAX_PATH
 #elif defined(CLIM_OS_MAC)
 	#include <sys/syslimits.h>
@@ -36,8 +37,8 @@
 
 #include <stdio.h>
 #include <stdint.h>
-#include <stdbool.h>
 #include <assert.h>
+#include <stdbool.h>
 #include "clim_mem.h"
 
 #define CLIM_MAX_ERR_MSG_LEN 512
@@ -50,7 +51,7 @@
 
 typedef enum
 {
-	CLIM_EC_SUCCESS = 0x00000000,
+	CLIM_EC_SUCCESS = 0x000000AF,
 	CLIM_EC_INVALID_PARAMETERS,
 	CLIM_EC_CONVERSION_ERROR,
 	CLIM_EC_CANNOT_CLOSE_FILE,
@@ -76,6 +77,8 @@ typedef enum
 } img_format_t;
 
 #define CLIM_SUCCESS(errcode) ((errcode) == (CLIM_EC_SUCCESS))
+#define CLIM_FAILED(errcode) (!CLIM_SUCCESS(errcode))
+
 #define CLIM_MAKE_POINT_STRUCT(name, type, ...)    \
 	typedef struct  						  \
 	{										  \
@@ -135,5 +138,6 @@ typedef struct
 #define CLIM_IMG_GET_WIDTH(ctx) (ctx->data.width)
 
 #define CLIM_ENSURE(cond) assert(cond)
+#define CLIM_ASSERT(cond) assert(cond)
 
 #endif
