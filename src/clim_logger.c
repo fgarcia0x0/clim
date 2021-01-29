@@ -9,6 +9,7 @@ static const char* const levels_str[] =
 	"CRITICAL"
 };
 
+// TODO: needed a mutex to run in different threads
 static char g_log_filepath[CLIM_MAX_OS_PATH] = {0};
 static FILE* g_file_handle = {0};
 
@@ -19,12 +20,12 @@ static FILE* g_file_handle = {0};
 	{									\
 		time_t t = time(NULL);			\
 		size_t n = strftime(input, sizeof(input), format, localtime(&t));\
-		assert(n > 0);					\
+		CLIM_ASSERT(n > 0);					\
 	} while (0)
 
 static void clim_build_filepath(const char* filename, const char* extension);
 
-CLIM_API void clim_log(
+CLIM_API void clim_log_write(
 	FILE* const stream, clim_log_level level, const char* file, 
 	unsigned line, const char* fmt, ...
 ) 
@@ -64,7 +65,7 @@ CLIM_API void clim_log(
 	if (filename == NULL)
 		filename = strrchr(file, '/');
 
-	assert(filename);
+	CLIM_ASSERT(filename);
 	filename++;
 
 	fprintf(stream, "[%s][%s%s%s] %s:%u: ",
@@ -101,26 +102,26 @@ static void clim_build_filepath(const char* filename, const char* extension)
 	GET_TIME_STR(time_str, "%m-%d-%Y_%H-%M-%S");
 	int len = snprintf(0, 0, "%s_%s_%s", filename, time_str, extension);
 
-	assert(len > 0);
-	assert(len < CLIM_MAX_OS_PATH);
+	CLIM_ASSERT(len > 0);
+	CLIM_ASSERT(len < CLIM_MAX_OS_PATH);
 
 	len = snprintf(g_log_filepath, (size_t)len + 1U, str_format,
 				   filename, time_str, extension);
 
-	assert(len > 0);
+	CLIM_ASSERT(len > 0);
 }
 
 CLIM_API clim_err_code_t clim_log_init(const char* filepath, const char* extension)
 {
-	if (!filepath || !*filepath)
+	if (!filepath || !*filepath || !extension)
 		return CLIM_EC_INVALID_PARAMETERS;
 
 	clim_build_filepath(filepath, extension);
 
-	assert(g_file_handle == NULL);
+	CLIM_ASSERT(g_file_handle == NULL);
 	g_file_handle = fopen(g_log_filepath, "a+");
 
-	if (!g_file_handle)
+	if (!g_file_handle || ferror(g_file_handle))
 		return CLIM_EC_CANNOT_OPEN_FILE;
 
 	return CLIM_EC_SUCCESS;

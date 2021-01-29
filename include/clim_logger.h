@@ -48,7 +48,7 @@ typedef enum
 	CLIM_LOG_LEVEL_CRITICAL
 } clim_log_level;
 
-CLIM_API void clim_log(
+CLIM_API void clim_log_write(
 	FILE* const stream, clim_log_level level, 
 	const char* file, unsigned line, const char* fmt, ...
 );
@@ -57,17 +57,17 @@ CLIM_API clim_err_code_t clim_log_init(const char* filepath, const char* extensi
 CLIM_API clim_err_code_t clim_log_close();
 
 #ifdef _DEBUG
-	#define CLIM_LOG_DEBUG(...) clim_log(stdout, CLIM_LOG_LEVEL_DEBUG, __FILE__, __LINE__, __VA_ARGS__)
-	#define CLIM_LOG_INFO(...) clim_log(stdout, CLIM_LOG_LEVEL_INFO, __FILE__, __LINE__, __VA_ARGS__)
-	#define CLIM_LOG_WARN(...) clim_log(stderr, CLIM_LOG_LEVEL_WARN, __FILE__, __LINE__, __VA_ARGS__)
-	#define CLIM_LOG_ERROR(...) clim_log(stderr, CLIM_LOG_LEVEL_ERROR, __FILE__, __LINE__, __VA_ARGS__)
-	#define CLIM_LOG_CRITICAL(...) clim_log(stderr, CLIM_LOG_LEVEL_CRITICAL, __FILE__, __LINE__, __VA_ARGS__)
+	#define CLIM_LOG_DEBUG(...) clim_log_write(stdout, CLIM_LOG_LEVEL_DEBUG, __FILE__, __LINE__, __VA_ARGS__)
+	#define CLIM_LOG_INFO(...) clim_log_write(stdout, CLIM_LOG_LEVEL_INFO, __FILE__, __LINE__, __VA_ARGS__)
+	#define CLIM_LOG_WARN(...) clim_log_write(stderr, CLIM_LOG_LEVEL_WARN, __FILE__, __LINE__, __VA_ARGS__)
+	#define CLIM_LOG_ERROR(...) clim_log_write(stderr, CLIM_LOG_LEVEL_ERROR, __FILE__, __LINE__, __VA_ARGS__)
+	#define CLIM_LOG_CRITICAL(...) clim_log_write(stderr, CLIM_LOG_LEVEL_CRITICAL, __FILE__, __LINE__, __VA_ARGS__)
 #else
 	#define CLIM_LOG_DEBUG(...)
-	#define CLIM_LOG_INFO(...) clim_log(stdout, CLIM_LOG_LEVEL_INFO, __FILE__, __LINE__, __VA_ARGS__)
-	#define CLIM_LOG_WARN(...) clim_log(stderr, CLIM_LOG_LEVEL_WARN, __FILE__, __LINE__, __VA_ARGS__)
-	#define CLIM_LOG_ERROR(...) clim_log(stderr, CLIM_LOG_LEVEL_ERROR, __FILE__, __LINE__, __VA_ARGS__)
-	#define CLIM_LOG_CRITICAL(...) clim_log(stderr, CLIM_LOG_LEVEL_CRITICAL, __FILE__, __LINE__, __VA_ARGS__)
+	#define CLIM_LOG_INFO(...) clim_log_write(stdout, CLIM_LOG_LEVEL_INFO, __FILE__, __LINE__, __VA_ARGS__)
+	#define CLIM_LOG_WARN(...) clim_log_write(stderr, CLIM_LOG_LEVEL_WARN, __FILE__, __LINE__, __VA_ARGS__)
+	#define CLIM_LOG_ERROR(...) clim_log_write(stderr, CLIM_LOG_LEVEL_ERROR, __FILE__, __LINE__, __VA_ARGS__)
+	#define CLIM_LOG_CRITICAL(...) clim_log_write(stderr, CLIM_LOG_LEVEL_CRITICAL, __FILE__, __LINE__, __VA_ARGS__)
 #endif
 
 #endif
