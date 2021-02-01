@@ -41,14 +41,6 @@
 #include <stdbool.h>
 #include "clim_mem.h"
 
-#define CLIM_MAX_ERR_MSG_LEN 512
-#define CLIM_INIT_ERR_H(msg_s, code_n) 		\
-	(clim_err_handle_t){ 					\
-		.msg = msg_s, .code = code_n, 		\
-		.file = __FILE__,					\
-		.func = __func__, .line = __LINE__	\
-	}
-
 typedef enum
 {
 	CLIM_EC_SUCCESS = 0x000000AF,
@@ -57,16 +49,7 @@ typedef enum
 	CLIM_EC_CANNOT_CLOSE_FILE,
 	CLIM_EC_CANNOT_OPEN_FILE,
 	CLIM_EC_UNKNOWN
-} clim_err_code_t;
-
-typedef struct
-{
-	char msg[CLIM_MAX_ERR_MSG_LEN];
-	clim_err_code_t code;
-	const char* file;
-	const char* func;
-	unsigned line;
-} clim_err_handle_t;
+} clim_errcode_t;
 
 typedef enum
 {
