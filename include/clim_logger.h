@@ -53,8 +53,8 @@ CLIM_API void clim_log_write(
 	const char* file, unsigned line, const char* fmt, ...
 );
 
-CLIM_API clim_err_code_t clim_log_init(const char* filepath, const char* extension);
-CLIM_API clim_err_code_t clim_log_close();
+CLIM_API clim_errcode_t clim_log_init(const char* filepath, const char* extension);
+CLIM_API clim_errcode_t clim_log_close();
 
 #ifdef _DEBUG
 	#define CLIM_LOG_DEBUG(...) clim_log_write(stdout, CLIM_LOG_LEVEL_DEBUG, __FILE__, __LINE__, __VA_ARGS__)

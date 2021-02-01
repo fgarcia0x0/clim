@@ -57,7 +57,7 @@ typedef enum
 	CLIM_IMAGE_FORMAT_JPEG,
 	CLIM_IMAGE_FORMAT_PNG,
 	CLIM_IMAGE_FORMAT_PGM
-} img_format_t;
+} clim_img_format_t;
 
 #define CLIM_SUCCESS(errcode) ((errcode) == (CLIM_EC_SUCCESS))
 #define CLIM_FAILED(errcode) (!CLIM_SUCCESS(errcode))
@@ -66,7 +66,7 @@ typedef enum
 	typedef struct  						  \
 	{										  \
 		type __VA_ARGS__;				  	  \
-	} name;							          \
+	} clim_##name;							          \
 
 CLIM_MAKE_POINT_STRUCT(point2_zu_t, size_t, x, y)
 
@@ -76,15 +76,7 @@ typedef struct
 	uint8_t r;
 	uint8_t g;
 	uint8_t b;
-} argb_t;
-
-typedef struct
-{
-	uint8_t b;
-	uint8_t g;
-	uint8_t r;
-	uint8_t a;
-} bgra_t;
+} clim_argb_t, clim_pixel_color;
 
 typedef struct
 {
@@ -92,28 +84,26 @@ typedef struct
 	uint32_t heigth;
 	uint8_t* pixels;
 	uint8_t  bytes_per_pixel;
-} img_data_t;
+} clim_img_data_t;
 
 typedef struct 
 {
 	FILE* fptr;
 	char filepath[CLIM_MAX_OS_PATH];
-} img_file_info_t;
+} clim_img_file_info_t;
 
 typedef struct
 {
-	img_file_info_t file;
-	img_format_t format;
-	img_data_t data;
-} img_ctx_t;
+	clim_img_file_info_t file;
+	clim_img_format_t format;
+	clim_img_data_t data;
+} clim_img_ctx_t;
 
-#define CLIM_IMG_MAKE_RGB(r, g, b) ((argb_t){255, r, g, b})
-#define CLIM_IMG_MAKE_ARGB(a, r, g, b) ((argb_t){a, r, g, b})
-#define CLIM_IMG_MAKE_BGR(b, g, r) ((bgra_t){b, g, r, 255})
-#define CLIM_IMG_MAKE_BGRA(b, g, r, a) ((bgra_t){b, g, r, a})
+#define CLIM_IMG_MAKE_RGB(r, g, b) ((clim_argb_t){255, r, g, b})
+#define CLIM_IMG_MAKE_ARGB(a, r, g, b) ((clim_argb_t){a, r, g, b})
 
 #define CLIM_ARGB_TO_UINT32(argb) 0
-#define CLIM_UINT32_TO_ARGB(n) (argb_t){0}
+#define CLIM_UINT32_TO_ARGB(n) (clim_argb_t){0}
 
 #define CLIM_IMG_SET_SIZE(ctx, w, h) do { ctx->data.width = w, ctx->data.heigth = h; } while(0)
 #define CLIM_IMG_SET_BPP(ctx, n) do { ctx->data.bytes_per_pixel = n; } while(0)
