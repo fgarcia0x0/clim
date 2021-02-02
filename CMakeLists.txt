@@ -41,7 +41,6 @@ elseif (CMAKE_COMPILER_IS_GCC)
 	message(STATUS "Generating GCC Additional Arguments")
 
     add_compile_options(-Wall -Wextra -Werror -Wpedantic -Wdouble-promotion -Wformat-overflow -Wformat-security -Wnull-dereference -Wmisleading-indentation -Wconversion -Wshadow -funsafe-loop-optimizations -Wunsafe-loop-optimizations -Wcast-qual -Wcast-align -Waddress)
-
     if (${CMAKE_C_COMPILER_VERSION} VERSION_GREATER_EQUAL 10.0)
     	add_compile_options(-Warith-conversion -fanalyzer)
     endif()
@@ -55,4 +54,8 @@ endif()
 add_executable(clim src/clim_img.c src/clim_utils.c src/clim_logger.c src/clim_main.c src/clim_mem.c)
 
 # set c version
-set_property(TARGET clim PROPERTY C_STANDARD 11)
+set_target_properties(clim PROPERTIES
+    C_STANDARD 11
+    C_STANDARD_REQUIRED ON
+    C_EXTENSIONS OFF
+)
