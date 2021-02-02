@@ -15,7 +15,7 @@ uint32_t clim_alpha_blend_pixels(const uint32_t p1, const uint32_t p2)
 	return ((rb & RBMASK) | (ag & AGMASK));
 }
 
-clim_err_code_t clim_utf16_to_utf8(
+clim_errcode_t clim_utf16_to_utf8(
 	const char16_t* restrict input, 
 	char* restrict output,
 	const size_t output_len, 
@@ -112,4 +112,32 @@ const void* clim_mem_search_rev(
 	}
 
     return NULL;
+}
+
+size_t strnlen(const char* src, size_t n)
+{
+	const char* p = memchr(src, 0, n);
+	return p ? (size_t)(p - src) : n;
+}
+
+size_t strlcpy(char* dest, const char* src, size_t dest_size)
+{
+	char* psave = dest;
+    
+	if (!dest_size--) 
+        return (size_t)(dest - psave) + strlen(src);
+
+	for (; dest_size && (*dest = *src); dest_size--, src++, dest++)
+        continue;
+
+	*dest = 0;
+	return (size_t)(dest - psave) + strlen(src);
+}
+
+size_t strlcat(char* dest, const char* src, size_t dest_size)
+{
+	size_t sz = strnlen(dest, dest_size);
+	if (sz == dest_size) 
+        return sz + strlen(src);
+	return sz + strlcpy(dest + sz, src, dest_size - sz);
 }
