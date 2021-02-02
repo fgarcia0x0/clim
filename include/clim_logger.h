@@ -13,7 +13,6 @@
 #include <stdarg.h>
 #include <stdint.h>
 #include <string.h>
-#include <stdnoreturn.h>
 #include <time.h>
 #include "clim_base.h"
 
@@ -59,7 +58,7 @@ CLIM_API void clim_log_write(
 CLIM_API clim_errcode_t clim_log_init(const char* filepath, const char* extension);
 CLIM_API clim_errcode_t clim_log_close();
 
-noreturn void clim_panic(const char* fmt, ...);
+CLIM_NORETURN void clim_panic(const char* fmt, ...);
 
 #ifdef CLIM_DEBUG_MODE
 	#define CLIM_LOG_DEBUG(...) clim_log_write(stdout, CLIM_LOG_LEVEL_DEBUG, __FILE__, __LINE__, __VA_ARGS__)
@@ -80,10 +79,10 @@ noreturn void clim_panic(const char* fmt, ...);
 
 #define CLIM_PANIC(msg, ...) clim_panic((msg), __VA_ARGS__)
 
-#define CLIM_PANIC_IF(cond, msg, ...) 				\
+#define CLIM_PANIC_IF(cond, ...) 				\
 	do												\
 	{												\
-		if (cond) clim_panic((msg), __VA_ARGS__);	\
+		if (cond) clim_panic(__VA_ARGS__);	\
 	} while(0)
 
 #endif

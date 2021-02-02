@@ -1,6 +1,6 @@
 #include <string.h>
-#include "..\include\clim_img.h"
-#include "..\include\clim_utils.h"
+#include "../include/clim_img.h"
+#include "../include/clim_utils.h"
 
 static inline void clim_get_argb_from_pixels(
 	const clim_img_ctx_t* pctx, size_t index, 
@@ -11,6 +11,28 @@ static inline void clim_get_argb_from_pixels(
 	pout_color->r = pctx->data.pixels[index + len + 1];	
 	pout_color->g = pctx->data.pixels[index + len + 2];		
 	pout_color->b = pctx->data.pixels[index + len + 3];
+}
+
+clim_argb_t clim_uint32_to_argb(uint32_t color)
+{
+	clim_argb_t result = {0};
+	result.a = (uint8_t)((color >> 24U) & UINT8_MAX);
+	result.r = (uint8_t)((color >> 16U) & UINT8_MAX);
+	result.g = (uint8_t)((color >> 8U)  & UINT8_MAX);
+	result.b = (uint8_t)(color & UINT8_MAX);
+	return result;
+}
+
+uint32_t clim_argb_to_uint32(clim_argb_t color)
+{
+	uint32_t result = {0};
+
+	result |= (uint32_t)((color.a & UINT8_MAX) << 24U);
+	result |= (uint32_t)((color.r & UINT8_MAX) << 16U);
+	result |= (uint32_t)((color.g & UINT8_MAX) << 8U);
+	result |= (uint32_t)((color.b & UINT8_MAX));
+
+	return result;
 }
 
 bool clim_img_set_pixel(clim_img_ctx_t* pctx, size_t x, size_t y, 
@@ -26,27 +48,23 @@ bool clim_img_set_pixel(clim_img_ctx_t* pctx, size_t x, size_t y,
 	const size_t len = sizeof(clim_argb_t);
 	clim_argb_t target = color;
 
-	if((x < width) && (y < height))
+	if((x >= width) || (y >= height))
 		return false;
 
 	uint8_t Alpha = a;
 
 	if (Alpha > 0 && Alpha < 0xffu)
 	{
-		// TODO: png, bitmap, jpeg return different format of colors
-		// make ToArgb, ToBgra e etcc
 		clim_argb_t pix_color = {0};
 		clim_get_argb_from_pixels(pctx, index, len, &pix_color);
 
 		uint32_t blend_color = clim_alpha_blend_pixels(
-			CLIM_ARGB_TO_UINT32(pix_color), CLIM_ARGB_TO_UINT32(color)
+			clim_argb_to_uint32(pix_color), clim_argb_to_uint32(color)
 		);
 
-		(void)blend_color;
-		target = CLIM_UINT32_TO_ARGB(blend_color);
+		target = clim_uint32_to_argb(blend_color);
 	}
 
-	// TODO: supomos que a cor nativa eh ARGB
 	pctx->data.pixels[index + len + 0] = target.a;
 	pctx->data.pixels[index + len + 1] = target.r;
 	pctx->data.pixels[index + len + 2] = target.g;
@@ -90,10 +108,46 @@ clim_argb_t clim_img_get_pixel_argb_pntzu(
 
 clim_errcode_t clim_img_load(
 	const char* filepath, 
-	clim_img_ctx_t** restrict ppctx
+	clim_img_ctx_t* restrict pctx
 ) 
 {
-	if (!ppctx || !filepath || !*filepath) 
+	if (!pctx || !filepath || !*filepath) 
 		return CLIM_EC_INVALID_PARAMETERS;
+
+	return CLIM_EC_SUCCESS;
+}
+
+clim_errcode_t clim_img_release(
+	clim_img_ctx_t* restrict pctx
+)
+{
+	if (!pctx) 
+		return CLIM_EC_INVALID_PARAMETERS;
+
+	if (pctx->file.fptr != NULL)
+	{
+		if (fclose(pctx->file.fptr) == EOF)
+		{
+			return CLIM_EC_CANNOT_CLOSE_FILE;
+		}
+	}
+
+	clim_mem_release(pctx->data.pixels);
+
+	memset(pctx, 0, sizeof(*pctx));
+	return CLIM_EC_SUCCESS;
+}
+
+clim_errcode_t clim_img_write(
+	const char* filename, const clim_img_ctx_t* restrict pctx,
+	clim_img_format_t format, clim_img_quality_t quality
+)
+{
+	if (!filename || !*filename || !pctx)
+		return CLIM_EC_INVALID_PARAMETERS;
+
+	(void)format;
+	(void)quality;
+
 	return CLIM_EC_SUCCESS;
 }

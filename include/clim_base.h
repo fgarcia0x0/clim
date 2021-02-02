@@ -3,20 +3,27 @@
 
 #include "clim_platform_detector.h"
 
-#if (__STDC_VERSION__ < 201112L)
-	#error This program needs at least a C11 compliant compiler
+#if CLIM_COMPILER_MSVC
+	#if _MSC_VER < 1920
+		#error This project needs MSVC 14.2 or greater
+	#endif
+#else
+	#if (__STDC_VERSION__ < 201112L)
+		#error This program needs at least a C11 compliant compiler
+	#endif
 #endif
 
 #ifdef CLIM_COMPILER_MSVC
 	#pragma once
 	#define _CRT_SECURE_NO_WARNINGS
+	#define MICROSOFT_WINDOWS_WINBASE_H_DEFINE_INTERLOCKED_CPLUSPLUS_OVERLOADS 0
 #endif
 
 #ifdef CLIM_OS_LINUX
 	#include <linux/limits.h>
 	#define CLIM_MAX_OS_PATH PATH_MAX
 #elif defined(CLIM_OS_WIN)
-	#include <minwindef.h>
+	#include <Windows.h>
 	#define CLIM_MAX_OS_PATH MAX_PATH
 #elif defined(CLIM_OS_MAC)
 	#include <sys/syslimits.h>
@@ -36,10 +43,24 @@
 	#define CLIM_HAVE_MEMMEM
 #endif
 
-#if defined(_DEBUG) || !defined(NDEBUG)
-	#define CLIM_DEBUG_MODE
+#ifdef CLIM_COMPILER_MSVC
+	#ifdef _DEBUG
+		#define CLIM_DEBUG_MODE
+	#else
+		#define CLIM_RELEASE_MODE
+	#endif
 #else
-	#define CLIM_RELEASE_MODE
+	#ifndef NDEBUG
+		#define CLIM_DEBUG_MODE
+	#else
+		#define CLIM_RELEASE_MODE
+	#endif
+#endif
+
+#ifdef CLIM_COMPILER_MSVC
+	#define CLIM_NORETURN
+#else
+	#define CLIM_NORETURN noreturn
 #endif
 
 // CLIM => COMMAND LINE IMAGE MANIPULATOR
@@ -49,6 +70,11 @@
 #include <stdint.h>
 #include <assert.h>
 #include <stdbool.h>
+
+#ifndef CLIM_COMPILER_MSVC
+	#include <stdnoreturn.h>
+#endif
+
 #include "clim_mem.h"
 
 typedef enum
@@ -61,13 +87,28 @@ typedef enum
 	CLIM_EC_UNKNOWN
 } clim_errcode_t;
 
+// char* clim_err_get_msg(clim_errcode_t)
+// char* clim_get_msg_from_errcode(clim_errcode_t)
+// GetErrorMessage()
+// clim_err_handle.c
+
 typedef enum
 {
+	CLIM_IMAGE_FORMAT_UNKNOWN = 0x0,
 	CLIM_IMAGE_FORMAT_BITMAP = 0x000002f,
 	CLIM_IMAGE_FORMAT_JPEG,
 	CLIM_IMAGE_FORMAT_PNG,
 	CLIM_IMAGE_FORMAT_PGM
 } clim_img_format_t;
+
+typedef enum
+{
+	CLIM_IMAGE_QUALITY_MIN = 5,
+	CLIM_IMAGE_QUALITY_LOW = 25,
+	CLIM_IMAGE_QUALITY_MEDIUM = 55,
+	CLIM_IMAGE_QUALITY_HIGH = 75,
+	CLIM_IMAGE_QUALITY_MAX = 100
+} clim_img_quality_t;
 
 #define CLIM_SUCCESS(errcode) ((errcode) == (CLIM_EC_SUCCESS))
 #define CLIM_FAILED(errcode) (!CLIM_SUCCESS(errcode))
@@ -111,9 +152,6 @@ typedef struct
 
 #define CLIM_IMG_MAKE_RGB(r, g, b) ((clim_argb_t){255, r, g, b})
 #define CLIM_IMG_MAKE_ARGB(a, r, g, b) ((clim_argb_t){a, r, g, b})
-
-#define CLIM_ARGB_TO_UINT32(argb) 0
-#define CLIM_UINT32_TO_ARGB(n) (clim_argb_t){0}
 
 #define CLIM_IMG_SET_SIZE(ctx, w, h) do { ctx->data.width = w, ctx->data.heigth = h; } while(0)
 #define CLIM_IMG_SET_BPP(ctx, n) do { ctx->data.bytes_per_pixel = n; } while(0)

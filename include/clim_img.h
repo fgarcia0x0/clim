@@ -12,6 +12,11 @@
 #define CLIM_IMG_SET_PIXEL(ctx, x, y, r, g, b) clim_img_set_pixel_argb(ctx, x, y, IMG_MAKE_RGB(r, g, b))
 #define CLIM_IMG_GET_PIXEL(ctx, x, y) clim_img_get_pixel_argb(ctx, x, y)
 
+
+clim_argb_t clim_uint32_to_argb(uint32_t color);
+
+uint32_t clim_argb_to_uint32(clim_argb_t color);
+
 /**
  * @brief      set pixel color in image
  *
@@ -74,13 +79,28 @@ clim_argb_t clim_img_get_pixel_argb_pntzu(
  * @see        clim_img_ctx_t
  *
  * @param[in]  filepath  the image path
- * @param      ppctx     pointer to image context
+ * @param      pctx     pointer to image context
  *
  * @return     EC_INVALID_PARAMATERS or EC_SUCCESS
  */
 clim_errcode_t clim_img_load(
 	const char* filepath, 
-	clim_img_ctx_t** restrict ppctx
+	clim_img_ctx_t* restrict pctx
+);
+
+/**
+ * @brief release image from image context
+ * 
+ * @param pctx pointer to image context
+ * @return EC_INVALID_PARAMATERS or EC_SUCCESS or CLIM_EC_CANNOT_CLOSE_FILE
+ */
+clim_errcode_t clim_img_release(
+	clim_img_ctx_t* restrict pctx
+);
+
+clim_errcode_t clim_img_write(
+	const char* filename, const clim_img_ctx_t* restrict pctx,
+	clim_img_format_t format, clim_img_quality_t quality
 );
 
 #endif

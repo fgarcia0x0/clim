@@ -1,4 +1,4 @@
-#include "..\include\clim_logger.h"
+#include "../include/clim_logger.h"
 
 static const char* const levels_str[] =
 {
@@ -159,7 +159,7 @@ CLIM_API clim_errcode_t clim_log_close()
 	return CLIM_EC_SUCCESS;
 }
 
-noreturn void clim_panic(const char* fmt, ...)
+CLIM_NORETURN void clim_panic(const char* fmt, ...)
 {
 	va_list list;
 	va_start(list, fmt);

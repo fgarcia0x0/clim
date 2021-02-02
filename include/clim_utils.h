@@ -41,8 +41,8 @@ const void* clim_mem_search_rev(
 	const void* needle, const size_t needle_len
 );
 
-size_t strnlen(const char* src, size_t n);
-size_t strlcpy(char* dest, const char* src, size_t dest_size);
-size_t strlcat(char* dest, const char* src, size_t dest_size);
+size_t clim_strnlen(const char* src, size_t n);
+size_t clim_strlcpy(char* dest, const char* src, size_t dest_size);
+size_t clim_strlcat(char* dest, const char* src, size_t dest_size);
 
 #endif

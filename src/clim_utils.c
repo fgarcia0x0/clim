@@ -1,5 +1,5 @@
-#include "..\include\clim_utils.h"
-#include "..\include\clim_mem.h"
+#include "../include/clim_utils.h"
+#include "../include/clim_mem.h"
 
 uint32_t clim_alpha_blend_pixels(const uint32_t p1, const uint32_t p2)
 {
@@ -114,30 +114,30 @@ const void* clim_mem_search_rev(
     return NULL;
 }
 
-size_t strnlen(const char* src, size_t n)
+size_t clim_strnlen(const char* src, size_t n)
 {
 	const char* p = memchr(src, 0, n);
 	return p ? (size_t)(p - src) : n;
 }
 
-size_t strlcpy(char* dest, const char* src, size_t dest_size)
+size_t clim_strlcpy(char* dest, const char* src, size_t dest_size)
 {
 	char* psave = dest;
     
-	if (!dest_size--) 
+	if (!dest_size) 
         return (size_t)(dest - psave) + strlen(src);
 
-	for (; dest_size && (*dest = *src); dest_size--, src++, dest++)
+	for (; dest_size && (*dest = *src) != '\0'; dest_size--, src++, dest++)
         continue;
 
 	*dest = 0;
 	return (size_t)(dest - psave) + strlen(src);
 }
 
-size_t strlcat(char* dest, const char* src, size_t dest_size)
+size_t clim_strlcat(char* dest, const char* src, size_t dest_size)
 {
-	size_t sz = strnlen(dest, dest_size);
+	size_t sz = clim_strnlen(dest, dest_size);
 	if (sz == dest_size) 
         return sz + strlen(src);
-	return sz + strlcpy(dest + sz, src, dest_size - sz);
+	return sz + clim_strlcpy(dest + sz, src, dest_size - sz);
 }
