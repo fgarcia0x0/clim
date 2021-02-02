@@ -67,15 +67,14 @@ clim_argb_t clim_img_get_pixel_argb(
 	size_t x_pos, size_t y_pos
 ) 
 {
-	CLIM_ENSURE(pctx && pctx->data.pixels);
+	CLIM_ASSERT(pctx && pctx->data.pixels);
 
 	const size_t width = CLIM_IMG_GET_WIDTH(pctx);
-	const size_t height = CLIM_IMG_GET_HEIGTH(pctx);
 	const size_t index = y_pos * width + x_pos;
 	const size_t len = sizeof(clim_argb_t);
 
 	clim_argb_t result = {0};
-	CLIM_ENSURE(x_pos < width && y_pos < height);
+	CLIM_ASSERT(x_pos < width && y_pos < CLIM_IMG_GET_HEIGTH(pctx));
 	
 	clim_get_argb_from_pixels(pctx, index, len, &result);
 	return result;
