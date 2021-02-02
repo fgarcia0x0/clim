@@ -3,69 +3,6 @@
 
 #include "clim_platform_detector.h"
 
-#if CLIM_COMPILER_MSVC
-	#if _MSC_VER < 1920
-		#error This project needs MSVC 14.2 or greater
-	#endif
-#else
-	#if (__STDC_VERSION__ < 201112L)
-		#error This program needs at least a C11 compliant compiler
-	#endif
-#endif
-
-#ifdef CLIM_COMPILER_MSVC
-	#pragma once
-	#define _CRT_SECURE_NO_WARNINGS
-	#define MICROSOFT_WINDOWS_WINBASE_H_DEFINE_INTERLOCKED_CPLUSPLUS_OVERLOADS 0
-#endif
-
-#ifdef CLIM_OS_LINUX
-	#include <linux/limits.h>
-	#define CLIM_MAX_OS_PATH PATH_MAX
-#elif defined(CLIM_OS_WIN)
-	#include <Windows.h>
-	#define CLIM_MAX_OS_PATH MAX_PATH
-#elif defined(CLIM_OS_MAC)
-	#include <sys/syslimits.h>
-	#define CLIM_MAX_OS_PATH PATH_MAX
-#else
-	#error "platform not supported"
-#endif
-
-#ifdef CLIM_COMPILER_MSVC
-	#ifndef __func__
-		#define __func__ __FUNCTION__
-	#endif
-	#define restrict __restrict
-#endif
-
-#if defined(CLIM_GNU_EXT)
-	#define CLIM_HAVE_MEMMEM
-#endif
-
-#ifdef CLIM_COMPILER_MSVC
-	#ifdef _DEBUG
-		#define CLIM_DEBUG_MODE
-	#else
-		#define CLIM_RELEASE_MODE
-	#endif
-#else
-	#ifndef NDEBUG
-		#define CLIM_DEBUG_MODE
-	#else
-		#define CLIM_RELEASE_MODE
-	#endif
-#endif
-
-#ifdef CLIM_COMPILER_MSVC
-	#define CLIM_NORETURN
-#else
-	#define CLIM_NORETURN noreturn
-#endif
-
-// CLIM => COMMAND LINE IMAGE MANIPULATOR
-#define CLIM_API
-
 #include <stdio.h>
 #include <stdint.h>
 #include <assert.h>
@@ -159,6 +96,6 @@ typedef struct
 #define CLIM_IMG_GET_WIDTH(ctx) (ctx->data.width)
 
 #define CLIM_ASSERT(cond) assert(cond)
-#define CLIM_STATIC_ASSERT(cond, msg) static_assert((cond), msg)
+#define CLIM_STATIC_ASSERT(pred) static_assert((pred), "Compile time assert constraint is not true: " #pred)
 
 #endif
