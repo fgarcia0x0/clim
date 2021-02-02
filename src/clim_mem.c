@@ -3,16 +3,14 @@
 #include <string.h>
 #include "..\include\clim_base.h"
 #include "..\include\clim_mem.h"
+#include "..\include\clim_logger.h"
 
 void* clim_alloc_mem(const size_t nbytes, bool clear)
 {
 	void* raw_mem = CLIM_DEFAULT_ALLOCATOR(nbytes);
 
-	if (!raw_mem)
-	{
-		fprintf(stderr, "[CRITICAL] [img_alloc_mem()] exausted memory");
-		exit(EXIT_FAILURE);
-	}
+	CLIM_PANIC_IF(!raw_mem, "cannot allocate %zu bytes, exausted memory", 
+				  nbytes);
 
 	if (clear) 
 		memset(raw_mem, 0, nbytes);
@@ -23,6 +21,6 @@ void* clim_alloc_mem(const size_t nbytes, bool clear)
 void clim_release_mem(void* mem)
 {
 	if (!mem) 
-		fprintf(stderr, "[WARNING] [img_release_mem()] trying release null pointer");
+		CLIM_LOG_WARN("trying release null pointer");
 	CLIM_DEFAULT_DEALLOCATOR(mem);
 }
