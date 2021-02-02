@@ -3,6 +3,10 @@
 
 #include "clim_platform_detector.h"
 
+#if (__STDC_VERSION__ < 201112L)
+	#error This program needs at least a C11 compliant compiler
+#endif
+
 #ifdef CLIM_COMPILER_MSVC
 	#pragma once
 	#define _CRT_SECURE_NO_WARNINGS
@@ -30,6 +34,12 @@
 
 #if defined(CLIM_GNU_EXT)
 	#define CLIM_HAVE_MEMMEM
+#endif
+
+#if defined(_DEBUG) || !defined(NDEBUG)
+	#define CLIM_DEBUG_MODE
+#else
+	#define CLIM_RELEASE_MODE
 #endif
 
 // CLIM => COMMAND LINE IMAGE MANIPULATOR
@@ -110,7 +120,7 @@ typedef struct
 #define CLIM_IMG_GET_HEIGTH(ctx) (ctx->data.heigth)
 #define CLIM_IMG_GET_WIDTH(ctx) (ctx->data.width)
 
-#define CLIM_ENSURE(cond) assert(cond)
 #define CLIM_ASSERT(cond) assert(cond)
+#define CLIM_STATIC_ASSERT(cond, msg) static_assert((cond), msg)
 
 #endif
