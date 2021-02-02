@@ -3,6 +3,7 @@
 static const char* const levels_str[] =
 {
 	"DEBUG",
+	"TRACE",
 	"INFO",
 	"WARN",
 	"ERROR",
@@ -21,9 +22,12 @@ static FILE* g_file_handle = {0};
 		time_t t = time(NULL);			\
 		size_t n = strftime(input, sizeof(input), format, localtime(&t));\
 		CLIM_ASSERT(n > 0);					\
+		(void)n; 							\
 	} while (0)
 
-static void clim_build_filepath(const char* filename, const char* extension);
+static void clim_build_filepath(
+	const char* filename, const char* extension
+);
 
 CLIM_API void clim_log_write(
 	FILE* const stream, clim_log_level level, const char* file, 
@@ -33,16 +37,19 @@ CLIM_API void clim_log_write(
 	va_list list;
 	va_start(list, fmt);
 
+	bool have_extra_info = file && *file;
+
 	char time_str[16] = {0};
 	GET_TIME_STR(time_str, "%H:%M:%S");
 
-	const char* start_color = NULL, *end_color = NULL;
+	const char* start_color = "", *end_color = "";
 	switch (level)
 	{
 		case CLIM_LOG_LEVEL_DEBUG:
 			start_color = end_color = CLIM_CONSOLE_FG_COLOR_WHITE;
 			break;
 		case CLIM_LOG_LEVEL_INFO:
+		case CLIM_LOG_LEVEL_TRACE:
 			start_color = CLIM_CONSOLE_FG_COLOR_GREEN;
 			end_color = CLIM_CONSOLE_FG_COLOR_WHITE;
 			break;
@@ -60,17 +67,24 @@ CLIM_API void clim_log_write(
 	}
 
 	const char* level_str = GET_LEVEL_STR((int)level);
-	const char* filename = strrchr(file, '\\');
+	const char* filename = NULL;
+	
+	fprintf(stream, "[%s][%s%s%s] ",
+			time_str, start_color, 
+			level_str, end_color);
+				
+	if (have_extra_info)
+	{
+		filename = strrchr(file, '\\');
 
-	if (filename == NULL)
-		filename = strrchr(file, '/');
+		if (!filename)
+			filename = strrchr(file, '/');
 
-	CLIM_ASSERT(filename);
-	filename++;
+		CLIM_ASSERT(filename);
+		filename++;
 
-	fprintf(stream, "[%s][%s%s%s] %s:%u: ",
-			time_str, start_color, level_str, 
-			end_color, filename, line);
+		fprintf(stream, "%s:%u: ", filename, line);
+	}
 
 	fprintf(stream, "%s", start_color);
 	vfprintf(stream, fmt, list);
@@ -82,9 +96,10 @@ CLIM_API void clim_log_write(
   	// write info in file handle
 	if (g_file_handle)
 	{
-		fprintf(g_file_handle, "[%s][%s] %s:%u: ", 
-				time_str, level_str,
-				filename, line);
+		fprintf(g_file_handle, "[%s][%s] ", time_str, level_str);
+
+		if (have_extra_info)
+			fprintf(g_file_handle, "%s:%u: ", filename, line);
 
 		vfprintf(g_file_handle, fmt, list);
 		fputc('\n', g_file_handle);
@@ -140,6 +155,17 @@ CLIM_API clim_errcode_t clim_log_close()
 		g_file_handle = NULL;
 	}
 
-	memset(g_log_filepath, 0, CLIM_MAX_OS_PATH);
+	memset(g_log_filepath, 0, sizeof g_log_filepath);
 	return CLIM_EC_SUCCESS;
+}
+
+noreturn void clim_panic(const char* fmt, ...)
+{
+	va_list list;
+	va_start(list, fmt);
+	fprintf(stderr, "[CLIM_PANIC] ");
+	vfprintf(stderr, fmt, list);
+	fputc('\n', stderr);
+	va_end(list);
+	exit(EXIT_FAILURE);
 }
