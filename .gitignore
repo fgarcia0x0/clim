@@ -59,5 +59,6 @@ build.bat
 /.vscode
 /.cache
 /.vs
+/build_scripts
 *.sublime-project
 *.sublime-workspace
