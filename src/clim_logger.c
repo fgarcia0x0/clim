@@ -29,7 +29,7 @@ static void clim_build_filepath(
 	const char* filename, const char* extension
 );
 
-CLIM_API void clim_log_write(
+void clim_log_write(
 	FILE* const stream, clim_log_level level, const char* file, 
 	unsigned line, const char* fmt, ...
 ) 
@@ -126,7 +126,7 @@ static void clim_build_filepath(const char* filename, const char* extension)
 	CLIM_ASSERT(len > 0);
 }
 
-CLIM_API clim_errcode_t clim_log_init(const char* filepath, const char* extension)
+clim_errcode_t clim_log_init(const char* filepath, const char* extension)
 {
 	if (!filepath || !*filepath || !extension)
 		return CLIM_EC_INVALID_PARAMETERS;
@@ -142,7 +142,7 @@ CLIM_API clim_errcode_t clim_log_init(const char* filepath, const char* extensio
 	return CLIM_EC_SUCCESS;
 }
 
-CLIM_API clim_errcode_t clim_log_close()
+clim_errcode_t clim_log_close()
 {
 	if (g_file_handle)
 	{

@@ -121,14 +121,15 @@
 	#define CLIM_DLL_EXPORT __declspec(dllexport)
 	#define CLIM_DLL_IMPORT	__declspec(dllimport)
 #else
-	#define CLIM_DLL_EXPORT	__attribute__ ((visibility("default"))) 
+	// -fvisibility=hidden
+	#define CLIM_DLL_EXPORT	__attribute__ ((visibility("default")))
 	#define CLIM_DLL_IMPORT
 #endif
 
 #ifdef CLIM_DYNAMIC_COMPILATION
-	#define CLIM_API	CLIM_DLL_EXPORT
+	#define CLIM_API CLIM_DLL_EXPORT
 #else
-	#define CLIM_API    CLIM_DLL_IMPORT
+	#define CLIM_API CLIM_DLL_IMPORT
 #endif
 
 #endif
