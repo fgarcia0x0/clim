@@ -21,6 +21,7 @@ typedef enum
 	CLIM_EC_CONVERSION_ERROR,
 	CLIM_EC_CANNOT_CLOSE_FILE,
 	CLIM_EC_CANNOT_OPEN_FILE,
+	CLIM_EC_PATH_IS_TOO_LONG,
 	CLIM_EC_UNKNOWN
 } clim_errcode_t;
 
@@ -46,6 +47,12 @@ typedef enum
 	CLIM_IMAGE_QUALITY_HIGH = 75,
 	CLIM_IMAGE_QUALITY_MAX = 100
 } clim_img_quality_t;
+
+typedef enum
+{
+	CLIM_IMG_COPY_DEEP = 0x000000AA,
+	CLIM_IMG_COPY_SHALLOW
+} clim_img_copy_method;
 
 #define CLIM_SUCCESS(errcode) ((errcode) == (CLIM_EC_SUCCESS))
 #define CLIM_FAILED(errcode) (!CLIM_SUCCESS(errcode))
@@ -76,13 +83,13 @@ typedef struct
 
 typedef struct 
 {
-	FILE* fptr;
+	/*FILE* fptr;*/
 	char filepath[CLIM_MAX_OS_PATH];
 } clim_img_file_info_t;
 
 typedef struct
 {
-	clim_img_file_info_t file;
+	clim_img_file_info_t fileinfo;
 	clim_img_format_t format;
 	clim_img_data_t data;
 } clim_img_ctx_t;
@@ -90,12 +97,15 @@ typedef struct
 #define CLIM_IMG_MAKE_RGB(r, g, b) ((clim_argb_t){255, r, g, b})
 #define CLIM_IMG_MAKE_ARGB(a, r, g, b) ((clim_argb_t){a, r, g, b})
 
-#define CLIM_IMG_SET_SIZE(ctx, w, h) do { ctx->data.width = w, ctx->data.heigth = h; } while(0)
-#define CLIM_IMG_SET_BPP(ctx, n) do { ctx->data.bytes_per_pixel = n; } while(0)
-#define CLIM_IMG_GET_HEIGTH(ctx) (ctx->data.heigth)
-#define CLIM_IMG_GET_WIDTH(ctx) (ctx->data.width)
+#define CLIM_IMG_SET_SIZE(ctx, w, h) do { (ctx)->data.width = w, (ctx)->data.heigth = h; } while(0)
+#define CLIM_IMG_SET_BPP(ctx, n) do { (ctx)->data.bytes_per_pixel = n; } while(0)
+#define CLIM_IMG_GET_HEIGTH(ctx) ((ctx)->data.heigth)
+#define CLIM_IMG_GET_WIDTH(ctx) ((ctx)->data.width)
 
 #define CLIM_ASSERT(cond) assert(cond)
 #define CLIM_STATIC_ASSERT(pred) static_assert((pred), "Compile time assert constraint is not true: " #pred)
+
+#define CLIM_UNREF_PARAM(param) \
+	(void)(param)
 
 #endif
