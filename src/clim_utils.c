@@ -1,20 +1,6 @@
 #include "../include/clim_utils.h"
 #include "../include/clim_mem.h"
 
-uint32_t clim_alpha_blend_pixels(const uint32_t p1, const uint32_t p2)
-{
-	const uint32_t AMASK = 0xFF000000;
-	const uint32_t RBMASK = 0x00FF00FF;
-	const uint32_t GMASK = 0x0000FF00;
-	const uint32_t AGMASK = AMASK | GMASK;
-	const uint32_t ONEALPHA = 0x01000000;
-	const uint32_t alpha = (p2 & AMASK) >> 24;
-	const uint32_t na = 0xffu - alpha;
-	const uint32_t rb = ((na * (p1 & RBMASK)) + (alpha * (p2 & RBMASK))) >> 8;
-	const uint32_t ag = (na * ((p1 & AGMASK) >> 8)) + (alpha * (ONEALPHA | ((p2 & GMASK) >> 8)));
-	return ((rb & RBMASK) | (ag & AGMASK));
-}
-
 clim_errcode_t clim_utf16_to_utf8(
 	const char16_t* restrict input, 
 	char* restrict output,
@@ -114,12 +100,6 @@ const void* clim_mem_search_rev(
     return NULL;
 }
 
-size_t clim_strnlen(const char* src, size_t n)
-{
-	const char* p = memchr(src, 0, n);
-	return p ? (size_t)(p - src) : n;
-}
-
 size_t clim_strlcpy(char* dest, const char* src, size_t dest_size)
 {
 	char* psave = dest;
@@ -132,12 +112,4 @@ size_t clim_strlcpy(char* dest, const char* src, size_t dest_size)
 
 	*dest = 0;
 	return (size_t)(dest - psave) + strlen(src);
-}
-
-size_t clim_strlcat(char* dest, const char* src, size_t dest_size)
-{
-	size_t sz = clim_strnlen(dest, dest_size);
-	if (sz == dest_size) 
-        return sz + strlen(src);
-	return sz + clim_strlcpy(dest + sz, src, dest_size - sz);
 }
