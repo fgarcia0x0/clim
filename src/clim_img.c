@@ -1,4 +1,5 @@
 #include <string.h>
+
 #include "../include/clim_img.h"
 #include "../include/clim_utils.h"
 #include "../include/clim_logger.h"
@@ -14,21 +15,19 @@ static inline void clim_get_argb_from_pixels(
 	pout_color->b = pctx->data.pixels[index + len + 3];
 }
 
-bool clim_img_set_pixel(clim_img_ctx_t* pctx, size_t x, size_t y, 
-				   	    uint8_t a, uint8_t r, uint8_t g, uint8_t b) 
+void clim_img_set_pixel(
+	clim_img_ctx_t* pctx, size_t x, size_t y, 
+	uint8_t a, uint8_t r, uint8_t g, uint8_t b
+) 
 {
-	if (pctx == NULL)
-		return false;
+	CLIM_ASSERT((pctx) && (x < width) && (y < CLIM_IMG_GET_HEIGTH(pctx)));
 
 	clim_argb_t color = (clim_argb_t){a, r, g, b};
 	const size_t width = CLIM_IMG_GET_WIDTH(pctx);
-	const size_t height = CLIM_IMG_GET_HEIGTH(pctx);
+
 	const size_t index = y * width + x;
 	const size_t len = sizeof(clim_argb_t);
 	clim_argb_t target = color;
-
-	if((x >= width) || (y >= height))
-		return false;
 
 	uint8_t Alpha = a;
 
@@ -48,19 +47,15 @@ bool clim_img_set_pixel(clim_img_ctx_t* pctx, size_t x, size_t y,
 	pctx->data.pixels[index + len + 1] = target.r;
 	pctx->data.pixels[index + len + 2] = target.g;
 	pctx->data.pixels[index + len + 3] = target.b;
-
-	return true;
 }
 
-bool clim_img_set_pixel_argb(
+void clim_img_set_pixel_argb(
 	clim_img_ctx_t* pctx, 
 	size_t x, size_t y, 
 	clim_argb_t color
 )
 {
-	return clim_img_set_pixel(
-		pctx, x, y, color.a, color.r, color.g, color.b
-	);
+	clim_img_set_pixel(pctx, x, y, color.a, color.r, color.g, color.b);
 }
 
 clim_argb_t clim_img_get_pixel_argb(
@@ -134,6 +129,7 @@ clim_errcode_t clim_img_write(
 
 	CLIM_UNREF_PARAM(format);
 	CLIM_UNREF_PARAM(quality);
+
 	return CLIM_EC_SUCCESS;
 }
 

@@ -9,7 +9,7 @@
 
 #include "clim_base.h"
 
-#define CLIM_IMG_SET_PIXEL(ctx, x, y, r, g, b) clim_img_set_pixel_argb(ctx, x, y, IMG_MAKE_RGB(r, g, b))
+#define CLIM_IMG_SET_PIXEL(ctx, x, y, r, g, b) clim_img_set_pixel_argb(ctx, x, y, CLIM_IMG_MAKE_RGB(r, g, b))
 #define CLIM_IMG_GET_PIXEL(ctx, x, y) clim_img_get_pixel_argb(ctx, x, y)
 
 static inline clim_argb_t clim_uint32_to_argb(uint32_t color)
@@ -43,9 +43,8 @@ static inline uint32_t clim_argb_to_uint32(clim_argb_t color)
  * @param[in]  g     green amount [0, 255]
  * @param[in]  b     blur amount [0, 255]
  *
- * @return     if parameters and content is valid return true, otherwise false
  */
-bool clim_img_set_pixel(
+void clim_img_set_pixel(
 	clim_img_ctx_t* pctx, size_t x, size_t y, 
 	uint8_t a, uint8_t r, uint8_t g, uint8_t b
 );
@@ -58,9 +57,8 @@ bool clim_img_set_pixel(
  * @param[in]  y      the y coordinate
  * @param[in]  color  the new color applied in the pixel position [x, y]
  *
- * @return     if parameters and content is valid return true, otherwise false
  */
-bool clim_img_set_pixel_argb(
+void clim_img_set_pixel_argb(
 	clim_img_ctx_t* pctx, 
 	size_t x, size_t y, 
 	clim_argb_t color
@@ -97,11 +95,11 @@ clim_argb_t clim_img_get_pixel_argb_pntzu(
 );
 
 /**
- * @brief      load an image into image context
+ * @brief      load image file into image context
  * @see        clim_img_ctx_t
  *
  * @param[in]  filepath  the image path
- * @param      pctx     pointer to image context
+ * @param      pctx      pointer to image context
  *
  * @return     EC_INVALID_PARAMATERS or EC_SUCCESS
  */
@@ -134,6 +132,13 @@ clim_errcode_t clim_img_write(
 	clim_img_format_t format, clim_img_quality_t quality
 );
 
+/**
+ * @brief copy src image to dest image
+ * 
+ * @param pctx_src pointer to source image context
+ * @param pctx_dest pointer to destination image context
+ * @param method the copy method
+ */
 void clim_img_copy(
     const clim_img_ctx_t* restrict pctx_src, 
     clim_img_ctx_t* restrict pctx_dest,
