@@ -132,4 +132,12 @@
 	#define CLIM_API CLIM_DLL_IMPORT
 #endif
 
+#if defined(CLIM_COMPILER_GCC) || defined(CLIM_COMPILER_CLANG)
+	#define CLIM_LIKELY(cond) 	__builtin_expect(!!(cond), 1)
+	#define CLIM_UNLIKELY(cond) __builtin_expect(!!(cond), 0)
+#else
+	#define CLIM_LIKELY(cond) 	(!!(cond))
+	#define CLIM_UNLIKELY(cond) (!!(cond))
+#endif
+
 #endif
