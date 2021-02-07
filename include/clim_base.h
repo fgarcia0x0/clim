@@ -13,22 +13,7 @@
 #endif
 
 #include "clim_mem.h"
-
-typedef enum
-{
-	CLIM_EC_SUCCESS = 0x000000AF,
-	CLIM_EC_INVALID_PARAMETERS,
-	CLIM_EC_CONVERSION_ERROR,
-	CLIM_EC_CANNOT_CLOSE_FILE,
-	CLIM_EC_CANNOT_OPEN_FILE,
-	CLIM_EC_PATH_IS_TOO_LONG,
-	CLIM_EC_UNKNOWN
-} clim_errcode_t;
-
-// char* clim_err_get_msg(clim_errcode_t)
-// char* clim_get_msg_from_errcode(clim_errcode_t)
-// GetErrorMessage()
-// clim_err_handle.c
+#include "clim_err_handle.h"
 
 typedef enum
 {
