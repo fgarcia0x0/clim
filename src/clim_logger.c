@@ -83,7 +83,8 @@ void clim_log_write(
 		CLIM_ASSERT(filename);
 		filename++;
 
-		fprintf(stream, "%s:%u: ", filename, line);
+		if (filename)
+			fprintf(stream, "%s:%u: ", filename, line);
 	}
 
 	fprintf(stream, "%s", start_color);
