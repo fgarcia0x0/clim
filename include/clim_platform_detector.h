@@ -140,4 +140,16 @@
 	#define CLIM_UNLIKELY(cond) (!!(cond))
 #endif
 
+#ifndef CLIM_THREAD_LOCAL
+	#if __STDC_VERSION__ >= 201112L && !defined(__STDC_NO_THREADS__)
+		#define CLIM_THREAD_LOCAL _Thread_local
+	#elif defined(CLIM_COMPILER_MSVC) || defined(CLIM_COMPILER_CLANG_CL)
+		#define CLIM_THREAD_LOCAL __declspec(thread) 
+	#elif defined CLIM_COMPILER_GNUC
+		#define CLIM_THREAD_LOCAL __thread
+	#else
+		#error "Cannot define CLIM_THREAD_LOCAL"
+	#endif
+#endif
+
 #endif
