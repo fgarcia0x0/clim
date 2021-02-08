@@ -93,4 +93,16 @@ static inline void* clim_mem_dup_n(
     return memcpy(dest, ptr, sz);
 }
 
+static inline char* clim_strdup(const char* pstr)
+{
+	const size_t len = strlen(pstr) + 1;
+	return clim_mem_dup(pstr, len);
+}
+
+static inline char* clim_strndup(const char* pstr, const size_t size)
+{
+	const size_t len = clim_strnlen(pstr, size);
+	return clim_mem_dup_n(pstr, len, len + 1);
+}
+
 #endif
