@@ -20,7 +20,7 @@ void clim_img_set_pixel(
 	uint8_t a, uint8_t r, uint8_t g, uint8_t b
 ) 
 {
-	CLIM_ASSERT((pctx) && (x < width) && (y < CLIM_IMG_GET_HEIGTH(pctx)));
+	CLIM_ASSERT((pctx) && (x < CLIM_IMG_GET_WIDTH(pctx)) && (y < CLIM_IMG_GET_HEIGTH(pctx)));
 
 	clim_argb_t color = (clim_argb_t){a, r, g, b};
 	const size_t width = CLIM_IMG_GET_WIDTH(pctx);
