@@ -11,8 +11,8 @@ static const char* const levels_str[] =
 };
 
 // TODO: needed a mutex to run in different threads
-static char g_log_filepath[CLIM_MAX_OS_PATH] = {0};
-static FILE* g_file_handle = {0};
+static CLIM_THREAD_LOCAL char g_log_filepath[CLIM_MAX_OS_PATH] = {0};
+static CLIM_THREAD_LOCAL FILE* g_file_handle = NULL;
 
 #define GET_LEVEL_STR(lvl) (levels_str[(lvl)])
 
@@ -135,9 +135,15 @@ clim_errcode_t clim_log_init(const char* filepath, const char* extension)
 	clim_build_filepath(filepath, extension);
 
 	CLIM_ASSERT(g_file_handle == NULL);
+	if (g_file_handle)
+	{
+		CLIM_LOG_ERROR("clim_log_init was already initialized, release previous instance");
+		return CLIM_EC_WAS_ALREADY_INIT;
+	}
+
 	g_file_handle = fopen(g_log_filepath, "a+");
 
-	if (!g_file_handle || ferror(g_file_handle))
+	if (!g_file_handle)
 		return CLIM_EC_CANNOT_OPEN_FILE;
 
 	return CLIM_EC_SUCCESS;
