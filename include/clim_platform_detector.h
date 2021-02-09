@@ -118,11 +118,11 @@
 #endif
 
 #ifdef CLIM_COMPILER_MSVC
-	#define CLIM_DLL_EXPORT __declspec(dllexport)
-	#define CLIM_DLL_IMPORT	__declspec(dllimport)
+	#define CLIM_DLL_EXPORT extern "C" __declspec(dllexport)
+	#define CLIM_DLL_IMPORT	extern "C" __declspec(import)
 #else
 	// -fvisibility=hidden
-	#define CLIM_DLL_EXPORT	__attribute__ ((visibility("default")))
+	#define CLIM_DLL_EXPORT	extern "C"
 	#define CLIM_DLL_IMPORT
 #endif
 

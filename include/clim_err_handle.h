@@ -37,7 +37,7 @@ static const clim_err_pair s_error_messages[MAX_ERRCODE_CODES] =
 
 static inline const char* clim_err_get_msg(clim_errcode_t errcode)
 {
-	const size_t index = (unsigned)errcode - (unsigned)CLIM_EC_SUCCESS;
+	const size_t index = (unsigned)errcode - CLIM_EC_SUCCESS;
 	return s_error_messages[index].msg;
 }
 

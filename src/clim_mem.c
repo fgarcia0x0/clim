@@ -7,7 +7,7 @@
 
 void* clim_mem_alloc(const size_t nbytes, bool clear)
 {
-	CLIM_LOG_TRACE("Alocating %zu bytes", nbytes);
+	CLIM_LOG_DEBUG("Alocating %zu bytes", nbytes);
 	void* raw_mem = CLIM_DEFAULT_ALLOCATOR(nbytes);
 
 	CLIM_PANIC_IF(
