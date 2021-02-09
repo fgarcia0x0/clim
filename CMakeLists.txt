@@ -11,7 +11,7 @@ if (WIN32)
 endif()
 
 # set the project name
-project(clim)
+project(clim VERSION 0.0.1)
 
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Debug")
