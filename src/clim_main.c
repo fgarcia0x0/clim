@@ -13,6 +13,6 @@ int main()
 	#else
 		CLIM_LOG_INFO("Running in Release Mode");
 	#endif
-		
+
 	CLIM_LOG_INFO("clim has been initialized");
 }

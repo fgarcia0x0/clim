@@ -11,7 +11,12 @@ if (WIN32)
 endif()
 
 # set the project name
-project(clim)
+project(clim VERSION 0.0.1)
+
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE "Debug")
+  message(STATUS "Build type not specified: Use Debug by default")
+endif(NOT CMAKE_BUILD_TYPE)
 
 # set additional compiler flags
 if (CMAKE_C_COMPILER_ID STREQUAL "Clang")
@@ -40,13 +45,12 @@ if (CMAKE_COMPILER_IS_MSVC)
 elseif (CMAKE_COMPILER_IS_GCC)
 	message(STATUS "Generating GCC Additional Arguments")
 
-    add_compile_options(-Wall -Wextra -Werror -Wpedantic -Wdouble-promotion -Wformat-overflow -Wformat-security -Wnull-dereference -Wmisleading-indentation -Wconversion -Wshadow -funsafe-loop-optimizations -Wunsafe-loop-optimizations -Wcast-qual -Wcast-align -Waddress)
+  add_compile_options(-Wall -Wextra -Werror -Wpedantic -Wdouble-promotion -Wformat-overflow -Wformat-security -Wnull-dereference -Wmisleading-indentation -Wconversion -Wshadow -funsafe-loop-optimizations -Wunsafe-loop-optimizations -Wcast-qual -Wcast-align -Waddress)
+  if (${CMAKE_C_COMPILER_VERSION} VERSION_GREATER_EQUAL 10.0)
+    add_compile_options(-Warith-conversion -fanalyzer)
+  endif()
 
-    if (${CMAKE_C_COMPILER_VERSION} VERSION_GREATER_EQUAL 10.0)
-    	add_compile_options(-Warith-conversion -fanalyzer)
-    endif()
-
-elseif (CMAKE_COMPILER_IS_CLANG)
+elseif (CMAKE_COMPILER_IS_CLANG OR CMAKE_COMPILER_IS_CLANG_CL)
 	 message(STATUS "Generating Clang Additional Arguments")
      add_compile_options(-Wall -Wextra -Werror -Wpedantic)
 endif()
@@ -55,4 +59,8 @@ endif()
 add_executable(clim src/clim_img.c src/clim_utils.c src/clim_logger.c src/clim_main.c src/clim_mem.c)
 
 # set c version
-set_property(TARGET clim PROPERTY C_STANDARD 11)
+set_target_properties(clim PROPERTIES
+    C_STANDARD 11
+    C_STANDARD_REQUIRED ON
+    C_EXTENSIONS OFF
+)
