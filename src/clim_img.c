@@ -9,7 +9,7 @@ static inline void clim_get_argb_from_pixels(
 	size_t len, clim_argb_t* pout_color
 )
 {
-	pout_color->a = pctx->data.pixels[index + len + 0];
+	pout_color->a = pctx->data.pixels[index + len   ];
 	pout_color->r = pctx->data.pixels[index + len + 1];
 	pout_color->g = pctx->data.pixels[index + len + 2];
 	pout_color->b = pctx->data.pixels[index + len + 3];
