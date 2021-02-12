@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+
 #include "../include/clim_base.h"
 #include "../include/clim_mem.h"
 #include "../include/clim_logger.h"
@@ -15,6 +16,10 @@ void* clim_mem_alloc(const size_t nbytes, bool clear)
 		"cannot allocate %zu bytes, exausted memory", 
 		nbytes
 	);
+
+	#if CLIM_COMPILER_MSVC
+		#pragma warning(suppress : 6387)
+	#endif
 
 	if (clear) 
 		memset(raw_mem, 0, nbytes);
