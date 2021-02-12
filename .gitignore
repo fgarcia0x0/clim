@@ -60,5 +60,6 @@ build.bat
 /.cache
 /.vs
 /build_scripts
+/out
 *.sublime-project
 *.sublime-workspace
