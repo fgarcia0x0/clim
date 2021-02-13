@@ -21,6 +21,12 @@
 
 #define CLIM_MEMMEM_REV(h, hl, n, nl) (clim_mem_search_rev((h), (hl), (n), (nl)))
 
+#define CLIM_MAX_ONE_BYTE_UTF8   0x007f // ASCII
+#define CLIM_MAX_TWO_BYTE_UTF8   0x07ff
+#define CLIM_MAX_THREE_BYTE_UTF8 0xFFFF
+#define CLIM_MAX_FOUR_BYTE_UTF8  0x10FFFF
+#define CLIM_CHAR16_BITS_CNT ((sizeof(char16_t)) * (CHAR_BIT))
+
 static inline uint32_t clim_alpha_blend_pixels(
 	const uint32_t p1, const uint32_t p2
 )
@@ -37,11 +43,38 @@ static inline uint32_t clim_alpha_blend_pixels(
 	return ((rb & RBMASK) | (ag & AGMASK));
 }
 
+static inline size_t clim_get_utf8_encode_len(const char16_t* pstr16)
+{
+	CLIM_ASSERT(pstr16);
+    size_t count = 0;
+
+    for (const char16_t* p = pstr16; *p; ++p)
+    {
+        if (*p <= CLIM_MAX_ONE_BYTE_UTF8)
+            ++count;
+        else if (*p <= CLIM_MAX_TWO_BYTE_UTF8)
+            count += 2;
+        else
+			count += 3;  
+    }
+
+    return count;
+}
+
+static inline size_t clim_strlen16(const char16_t* pstr16)
+{
+	CLIM_ASSERT(pstr16);
+	const char16_t* ptracker = pstr16;
+	for (; *ptracker; ++ptracker)
+		;
+	return (size_t)(ptracker - pstr16);
+}
+
 clim_errcode_t clim_utf16_to_utf8(
 	const char16_t* restrict input, 
 	char* restrict output, 
 	const size_t output_len,
-	size_t* restrict pout_bytes_written
+	size_t* restrict pout_utf8_bytes_written
 );
 
 void* clim_mem_search(
