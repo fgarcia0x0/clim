@@ -44,13 +44,13 @@ clim_errcode_t clim_utf16_to_utf8(
 	size_t* restrict pout_bytes_written
 );
 
-const void* clim_mem_search(
-	const void* haystack, size_t haystack_len, 
+void* clim_mem_search(
+	void* haystack, size_t haystack_len,
 	const void* needle, const size_t needle_len
 );
 
-const void* clim_mem_search_rev(
-	const void* haystack, size_t haystack_len, 
+void* clim_mem_search_rev(
+	void* haystack, size_t haystack_len,
 	const void* needle, const size_t needle_len
 );
 
@@ -95,12 +95,14 @@ static inline void* clim_mem_dup_n(
 
 static inline char* clim_strdup(const char* pstr)
 {
+	CLIM_ASSERT(pstr);
 	const size_t len = strlen(pstr) + 1;
 	return clim_mem_dup(pstr, len);
 }
 
 static inline char* clim_strndup(const char* pstr, const size_t size)
 {
+	CLIM_ASSERT(pstr && size);
 	const size_t len = clim_strnlen(pstr, size);
 	return clim_mem_dup_n(pstr, len, len + 1);
 }
