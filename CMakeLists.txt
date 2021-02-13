@@ -41,7 +41,7 @@ endif()
 
 if (CMAKE_COMPILER_IS_MSVC)
 	message(STATUS "Generating MSVC Additional Arguments")
-    add_compile_options(/W4 /MP)
+  add_compile_options(/W4 /MP)
 elseif (CMAKE_COMPILER_IS_GCC)
 	message(STATUS "Generating GCC Additional Arguments")
 

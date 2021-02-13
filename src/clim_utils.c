@@ -50,18 +50,17 @@ clim_errcode_t clim_utf16_to_utf8(
   	return CLIM_EC_SUCCESS;
 }
 
-const void* clim_mem_search(
-	const void* haystack, size_t haystack_len, 
+void* clim_mem_search(
+	void* haystack, size_t haystack_len,
 	const void* needle, const size_t needle_len
 ) 
 {
-	if (!haystack || !haystack_len || !needle)
-		return NULL;
-
+	CLIM_ASSERT(haystack && haystack_len && needle);
+	
 	if (!needle_len || haystack == needle)
 		return haystack;
 
-	const uint8_t* hptr = (const uint8_t *) haystack;
+	uint8_t* hptr = (uint8_t *) haystack;
 	const uint8_t* nptr = (const uint8_t *) needle;
 
 	for (; haystack_len >= needle_len; ++hptr, --haystack_len)
@@ -75,18 +74,17 @@ const void* clim_mem_search(
     return NULL;
 }
 
-const void* clim_mem_search_rev(
-	const void* haystack, size_t haystack_len, 
+void* clim_mem_search_rev(
+	void* haystack, size_t haystack_len,
 	const void* needle, const size_t needle_len
 )
 {
-	if (!haystack || !haystack_len || !needle)
-		return NULL;
+	CLIM_ASSERT(haystack && haystack_len && needle);
 
 	if (!needle_len || haystack == needle)
 		return haystack;
 
-	const uint8_t* hptr = (const uint8_t *)(haystack) + haystack_len - 1;
+	uint8_t* hptr = (uint8_t *)(haystack) + haystack_len - needle_len;
 	const uint8_t* nptr = (const uint8_t *) needle;
 
 	for (; haystack_len >= needle_len; --hptr, --haystack_len)
