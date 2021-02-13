@@ -15,6 +15,14 @@
 #include "clim_mem.h"
 #include "clim_err_handle.h"
 
+#ifdef CLIM_OS_WIN
+	#define CLIM_WIN_UTF8_CODEPAGE 65001
+    extern int __stdcall SetConsoleOutputCP(unsigned wCodePageID);
+#endif
+
+#define CLIM_DO_IF(cond, ...) \
+	do{ (cond) ? (__VA_ARGS__) : (void)0; } while (0)
+
 typedef enum
 {
 	CLIM_IMAGE_FORMAT_UNKNOWN = 0x0,
