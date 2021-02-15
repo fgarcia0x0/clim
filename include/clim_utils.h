@@ -25,7 +25,6 @@
 #define CLIM_MAX_TWO_BYTE_UTF8   0x07ff
 #define CLIM_MAX_THREE_BYTE_UTF8 0xFFFF
 #define CLIM_MAX_FOUR_BYTE_UTF8  0x10FFFF
-#define CLIM_CHAR16_BITS_CNT ((sizeof(char16_t)) * (CHAR_BIT))
 
 static inline uint32_t clim_alpha_blend_pixels(
 	const uint32_t p1, const uint32_t p2
@@ -54,8 +53,10 @@ static inline size_t clim_get_utf8_encode_len(const char16_t* pstr16)
             ++count;
         else if (*p <= CLIM_MAX_TWO_BYTE_UTF8)
             count += 2;
-        else
-			count += 3;  
+        else if (*p < CLIM_MAX_THREE_BYTE_UTF8)
+			count += 3;
+		else
+			break;
     }
 
     return count;
@@ -70,9 +71,18 @@ static inline size_t clim_strlen16(const char16_t* pstr16)
 	return (size_t)(ptracker - pstr16);
 }
 
+static inline size_t clim_strlen32(const char32_t* pstr32)
+{
+	CLIM_ASSERT(pstr32);
+	const char32_t* ptracker = pstr32;
+	for (; *ptracker; ++ptracker)
+		;
+	return (size_t)(ptracker - pstr32);
+}
+
 clim_errcode_t clim_utf16_to_utf8(
 	const char16_t* restrict input, 
-	char* restrict output, 
+	uint8_t* restrict output, 
 	const size_t output_len,
 	size_t* restrict pout_utf8_bytes_written
 );
