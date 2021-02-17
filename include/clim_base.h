@@ -23,6 +23,9 @@
 #define CLIM_DO_IF(cond, ...) \
 	do{ (cond) ? (__VA_ARGS__) : (void)0; } while (0)
 
+typedef unsigned char char8_t;
+#define U8(str) (const char8_t *)(str)
+
 typedef enum
 {
 	CLIM_IMAGE_FORMAT_UNKNOWN = 0x0,

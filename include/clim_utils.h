@@ -11,7 +11,11 @@
 #include <uchar.h>
 #include <string.h>
 #include <limits.h>
+
 #include "clim_base.h"
+#ifdef CLIM_DEBUG_MODE
+	#include "clim_logger.h"
+#endif
 
 #ifdef CLIM_HAVE_MEMMEM
 	#define CLIM_MEMMEM(h, hl, n, nl) (memmem((h), (hl), (n), (nl)))
@@ -62,6 +66,28 @@ static inline size_t clim_get_utf8_encode_len(const char16_t* pstr16)
     return count;
 }
 
+static inline size_t clim_get_utf8_encode_len_32(const char32_t* pstr32)
+{
+	CLIM_ASSERT(pstr32);
+    size_t count = 0;
+
+    for (const char32_t* p = pstr32; *p; ++p)
+    {
+        if (*p <= CLIM_MAX_ONE_BYTE_UTF8)
+            ++count;
+        else if (*p <= CLIM_MAX_TWO_BYTE_UTF8)
+            count += 2;
+        else if (*p <= CLIM_MAX_THREE_BYTE_UTF8)
+			count += 3;
+		else if (*p <= CLIM_MAX_FOUR_BYTE_UTF8)
+			count += 4;
+		else
+			break;
+    }
+
+    return count;
+}
+
 static inline size_t clim_strlen16(const char16_t* pstr16)
 {
 	CLIM_ASSERT(pstr16);
@@ -80,9 +106,42 @@ static inline size_t clim_strlen32(const char32_t* pstr32)
 	return (size_t)(ptracker - pstr32);
 }
 
+/**
+ * @brief      Maps a UTF-16 character set to its UTF-8 counterpart
+ *
+ * @param[in]  input                    A pointer to a UTF-16 encoded character
+ *                                      set
+ * @param      output                   The destination buffer where UTF-8
+ *                                      multi-byte characters will be written
+ * @param[in]  output_len               The size of output buffer
+ * @param      pout_utf8_bytes_written  The amount of bytes written in output
+ *
+ * @return     The clim errcode: CLIM_EC_INVALID_PARAMETERS or CLIM_EC_SUCCESS
+ *             or CLIM_EC_CONVERSION_ERROR
+ */
 clim_errcode_t clim_utf16_to_utf8(
 	const char16_t* restrict input, 
-	uint8_t* restrict output, 
+	char8_t* restrict output, 
+	const size_t output_len,
+	size_t* restrict pout_utf8_bytes_written
+);
+
+/**
+ * @brief      Maps a UTF-32 character set to its UTF-8 counterpart
+ *
+ * @param[in]  input                    A pointer to a UTF-32 encoded character
+ *                                      set
+ * @param      output                   The destination buffer where UTF-8
+ *                                      multi-byte characters will be written
+ * @param[in]  output_len               The size of output buffer
+ * @param      pout_utf8_bytes_written  The amount of bytes written in output
+ *
+ * @return     The clim errcode: CLIM_EC_INVALID_PARAMETERS or CLIM_EC_SUCCESS
+ *             or CLIM_EC_CONVERSION_ERROR
+ */
+clim_errcode_t clim_utf32_to_utf8(
+	const char32_t* restrict input,
+	char8_t* restrict output,
 	const size_t output_len,
 	size_t* restrict pout_utf8_bytes_written
 );
@@ -148,6 +207,78 @@ static inline char* clim_strndup(const char* pstr, const size_t size)
 	CLIM_ASSERT(pstr && size);
 	const size_t len = clim_strnlen(pstr, size);
 	return clim_mem_dup_n(pstr, len, len + 1);
+}
+
+static inline char8_t* clim_utf8_dupl_from_utf16(const char16_t* pstr16)
+{
+	if (!pstr16)
+		return NULL;
+
+	const size_t needed_len = clim_get_utf8_encode_len(pstr16);
+	if (!needed_len)
+		return NULL;
+
+	char8_t* pstr8 = (char8_t *) clim_mem_alloc(needed_len + 1, false);
+	size_t writted = 0;
+	
+	clim_errcode_t errc = clim_utf16_to_utf8(
+		pstr16, pstr8, needed_len, &writted
+	);
+
+	if (CLIM_FAILED(errc))
+	{
+		#ifdef CLIM_DEBUG_MODE
+			CLIM_LOG_DEBUG("%s(): %s", __func__, clim_err_get_msg(errc));
+		#endif
+
+		clim_mem_release(pstr8);
+		return NULL;
+	}
+
+	if (writted != needed_len)
+	{
+		clim_mem_release(pstr8);
+		return NULL;
+	}
+
+	pstr8[needed_len] = 0;
+	return pstr8;
+}
+
+static inline char8_t* clim_utf8_dupl_from_utf32(const char32_t* pstr32)
+{
+	if (!pstr32)
+		return NULL;
+
+	const size_t needed_len = clim_get_utf8_encode_len_32(pstr32);
+	if (!needed_len)
+		return NULL;
+
+	char8_t* pstr8 = (char8_t *) clim_mem_alloc(needed_len + 1, false);
+	size_t writted = 0;
+	
+	clim_errcode_t errc = clim_utf32_to_utf8(
+		pstr32, pstr8, needed_len, &writted
+	);
+
+	if (CLIM_FAILED(errc))
+	{
+		#ifdef CLIM_DEBUG_MODE
+			CLIM_LOG_DEBUG("%s(): %s", __func__, clim_err_get_msg(errc));
+		#endif
+
+		clim_mem_release(pstr8);
+		return NULL;
+	}
+
+	if (writted != needed_len)
+	{
+		clim_mem_release(pstr8);
+		return NULL;
+	}
+
+	pstr8[needed_len] = 0;
+	return pstr8;
 }
 
 #endif
