@@ -209,7 +209,9 @@ static inline char* clim_strndup(const char* pstr, const size_t size)
 	return clim_mem_dup_n(pstr, len, len + 1);
 }
 
-static inline char8_t* clim_utf8_dupl_from_utf16(const char16_t* pstr16)
+static inline char8_t* clim_utf8_dupl_from_utf16(
+	const char16_t* pstr16, size_t* pout_length
+)
 {
 	if (!pstr16)
 		return NULL;
@@ -241,11 +243,16 @@ static inline char8_t* clim_utf8_dupl_from_utf16(const char16_t* pstr16)
 		return NULL;
 	}
 
+	if (pout_length)
+		*pout_length = writted;
+
 	pstr8[needed_len] = 0;
 	return pstr8;
 }
 
-static inline char8_t* clim_utf8_dupl_from_utf32(const char32_t* pstr32)
+static inline char8_t* clim_utf8_dupl_from_utf32(
+	const char32_t* pstr32, size_t* pout_length
+)
 {
 	if (!pstr32)
 		return NULL;
@@ -276,6 +283,9 @@ static inline char8_t* clim_utf8_dupl_from_utf32(const char32_t* pstr32)
 		clim_mem_release(pstr8);
 		return NULL;
 	}
+
+	if (pout_length)
+		*pout_length = writted;
 
 	pstr8[needed_len] = 0;
 	return pstr8;
