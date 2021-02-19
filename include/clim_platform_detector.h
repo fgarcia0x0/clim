@@ -97,18 +97,10 @@
 	#define CLIM_HAVE_MEMMEM
 #endif
 
-#ifdef CLIM_COMPILER_MSVC
-	#ifdef _DEBUG
-		#define CLIM_DEBUG_MODE
-	#else
-		#define CLIM_RELEASE_MODE
-	#endif
+#ifndef NDEBUG
+	#define CLIM_DEBUG_MODE
 #else
-	#ifndef NDEBUG
-		#define CLIM_DEBUG_MODE
-	#else
-		#define CLIM_RELEASE_MODE
-	#endif
+	#define CLIM_RELEASE_MODE
 #endif
 
 #ifdef CLIM_COMPILER_MSVC
@@ -141,7 +133,7 @@
 #endif
 
 #ifndef CLIM_THREAD_LOCAL
-	#if __STDC_VERSION__ >= 201112L
+	#if __STDC_VERSION__ >= 201112L && !defined(__STDC_NO_THREADS__)
 		#define CLIM_THREAD_LOCAL _Thread_local
 	#elif defined(CLIM_COMPILER_MSVC) || defined(CLIM_COMPILER_CLANG_CL)
 		#define CLIM_THREAD_LOCAL __declspec(thread) 
@@ -150,6 +142,11 @@
 	#else
 		#error "Cannot define CLIM_THREAD_LOCAL"
 	#endif
+#endif
+
+#if defined(CLIM_OS_WIN) && defined(CLIM_COMPILER_CLANG)
+	#undef CLIM_THREAD_LOCAL
+	#define CLIM_THREAD_LOCAL
 #endif
 
 #endif
