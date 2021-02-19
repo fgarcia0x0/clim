@@ -14,7 +14,7 @@ endif()
 project(clim VERSION 0.0.1)
 
 if(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE "Debug")
+  set(CMAKE_BUILD_TYPE Debug)
   message(STATUS "Build type not specified: Use Debug by default")
 endif(NOT CMAKE_BUILD_TYPE)
 
@@ -39,20 +39,26 @@ if (CMAKE_C_COMPILER_ID STREQUAL "MSVC")
     set(CMAKE_COMPILER_IS_MSVC true)
 endif()
 
-if (CMAKE_COMPILER_IS_MSVC)
-	message(STATUS "Generating MSVC Additional Arguments")
-  add_compile_options(/W4 /MP)
-elseif (CMAKE_COMPILER_IS_GCC)
-	message(STATUS "Generating GCC Additional Arguments")
+if (CMAKE_BUILD_TYPE MATCHES Release)
+  message("Compiling in Release Mode")
+  add_compile_options(-DNDEBUG)
+endif()
 
-  add_compile_options(-Wall -Wextra -Werror -Wpedantic -Wdouble-promotion -Wformat-overflow -Wformat-security -Wnull-dereference -Wmisleading-indentation -Wconversion -Wshadow -funsafe-loop-optimizations -Wunsafe-loop-optimizations -Wcast-qual -Wcast-align -Waddress)
+if (CMAKE_COMPILER_IS_MSVC)
+  message(STATUS "Generating MSVC Additional Arguments")
+  add_compile_options(/W4 /MP /utf-8)
+
+elseif (CMAKE_COMPILER_IS_GCC)
+  message(STATUS "Generating GCC Additional Arguments")
+
+  add_compile_options(-Wall -Wextra -Werror -Wpedantic -Wdouble-promotion -Wformat-overflow -Wformat-security -Wnull-dereference -Wmisleading-indentation -Wconversion -Wshadow -funsafe-loop-optimizations -Wunsafe-loop-optimizations -Wcast-qual -Wcast-align -Waddress -D__USE_MINGW_ANSI_STDIO=1)
   if (${CMAKE_C_COMPILER_VERSION} VERSION_GREATER_EQUAL 10.0)
     add_compile_options(-Warith-conversion -fanalyzer)
   endif()
 
 elseif (CMAKE_COMPILER_IS_CLANG OR CMAKE_COMPILER_IS_CLANG_CL)
-	 message(STATUS "Generating Clang Additional Arguments")
-     add_compile_options(-Wall -Wextra -Werror -Wpedantic)
+   message(STATUS "Generating Clang Additional Arguments")
+   add_compile_options(-Wall -Wextra -Werror -Wpedantic)
 endif()
 
 # add the executable
