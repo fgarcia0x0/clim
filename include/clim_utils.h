@@ -291,4 +291,23 @@ static inline char8_t* clim_utf8_dupl_from_utf32(
 	return pstr8;
 }
 
+static inline void clim_print_hex_bytes_ext(
+	FILE* stream, const void* buffer, 
+	size_t len, bool lowercase
+)
+{
+	CLIM_ASSERT(stream && buffer && len);
+
+	// cast is necessary for c++ compatibility
+	for (const uint8_t* pbuffer = (const uint8_t *)buffer; pbuffer && len--; ++pbuffer)
+		fprintf(stream, lowercase ? "%#x " : "%#X ", *pbuffer);
+
+	putchar('\n');
+}
+
+static CLIM_ALWAYS_INLINE void clim_print_hex_bytes(const void* buffer, size_t len)
+{
+	clim_print_hex_bytes_ext(stdout, buffer, len, false);
+}
+
 #endif
