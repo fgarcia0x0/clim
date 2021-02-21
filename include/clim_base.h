@@ -75,6 +75,7 @@ typedef struct
 	uint32_t heigth;
 	uint8_t* pixels;
 	uint8_t  bytes_per_pixel;
+	void* reserved;
 } clim_img_data_t;
 
 typedef struct 
