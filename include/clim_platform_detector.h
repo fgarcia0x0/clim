@@ -149,4 +149,10 @@
 	#define CLIM_THREAD_LOCAL
 #endif
 
+#if defined(CLIM_COMPILER_GCC) || defined(CLIM_COMPILER_CLANG)
+	#define CLIM_ALWAYS_INLINE inline __attribute__((always_inline))
+#else
+	#define CLIM_ALWAYS_INLINE inline
+#endif
+
 #endif
