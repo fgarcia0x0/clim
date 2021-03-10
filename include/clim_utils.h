@@ -521,7 +521,6 @@ static inline void clim_fclose(FILE* restrict fileptr)
 	#endif
 }
 
-
 static char** clim_split_str_ex(
 	const char* text, const char* delimiter, 
 	size_t* pout_nelem, clim_search_predicate search_fn
@@ -565,6 +564,31 @@ static inline char** clim_split_str(
 	CLIM_ASSERT(text && delimiter && search_fn);
 	CLIM_ASSERT(*text && *delimiter);
 	return clim_split_str_ex(text, delimiter, pout_nelem, strstr);
+}
+
+static void clim_skip_chars(char* text, const char* chars)
+{
+	CLIM_ASSERT(text && chars);
+
+	char* temp = text;
+	do
+	{
+		while (*temp && strchr(chars, *temp))
+			++temp;
+	} while ((*text++ = *temp++));
+}
+
+static size_t clim_str_count_if(char* begin, char* end, int(*pred)(int c))
+{
+	size_t cnt = 0;
+
+	for (; begin < end; ++begin)
+	{
+		if (pred((unsigned)(*begin)))
+			++cnt;
+	}
+
+	return cnt;
 }
 
 #endif

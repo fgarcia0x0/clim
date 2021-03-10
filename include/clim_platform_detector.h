@@ -104,7 +104,7 @@
 #endif
 
 #ifdef CLIM_COMPILER_MSVC
-	#define CLIM_NORETURN
+	#define CLIM_NORETURN __declspec(noreturn)
 #else
 	#define CLIM_NORETURN noreturn
 #endif
