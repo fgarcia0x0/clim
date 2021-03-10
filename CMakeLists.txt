@@ -51,18 +51,24 @@ if (CMAKE_COMPILER_IS_MSVC)
 elseif (CMAKE_COMPILER_IS_GCC)
   message(STATUS "Generating GCC Additional Arguments")
 
-  add_compile_options(-Wall -Wextra -Werror -Wpedantic -Wdouble-promotion -Wformat-overflow -Wformat-security -Wnull-dereference -Wmisleading-indentation -Wconversion -Wshadow -funsafe-loop-optimizations -Wunsafe-loop-optimizations -Wcast-qual -Wcast-align -Waddress -D__USE_MINGW_ANSI_STDIO=1)
+  add_compile_options(-Wall -Wextra -Werror -Wpedantic -Wno-unused-parameter -Wno-unused-function -Wdouble-promotion -Wformat-overflow -Wformat-security -Wnull-dereference -Wmisleading-indentation -Wconversion -Wshadow -funsafe-loop-optimizations -Wunsafe-loop-optimizations -Wcast-qual -Wcast-align -Waddress -D__USE_MINGW_ANSI_STDIO=1)
   if (${CMAKE_C_COMPILER_VERSION} VERSION_GREATER_EQUAL 10.0)
     add_compile_options(-Warith-conversion -fanalyzer)
   endif()
 
 elseif (CMAKE_COMPILER_IS_CLANG OR CMAKE_COMPILER_IS_CLANG_CL)
    message(STATUS "Generating Clang Additional Arguments")
-   add_compile_options(-Wall -Wextra -Werror -Wpedantic)
+   add_compile_options(-Wall -Wextra -Werror -Wpedantic -Wno-unused-parameter -Wno-unused-function)
 endif()
 
+file(GLOB_RECURSE CLIM_SOURCES RELATIVE ${CMAKE_SOURCE_DIR} "src/*.c")
+file(GLOB_RECURSE CLIM_TEST_SUITE_SOURCES RELATIVE ${CMAKE_SOURCE_DIR} "clim_test_main.c")
+
 # add the executable
-add_executable(clim src/clim_img.c src/clim_utils.c src/clim_logger.c src/clim_main.c src/clim_mem.c)
+add_executable(clim ${CLIM_SOURCES})
+
+# add test executable
+add_executable(clim_test_suite ${CLIM_TEST_SUITE_SOURCES})
 
 # set c version
 set_target_properties(clim PROPERTIES

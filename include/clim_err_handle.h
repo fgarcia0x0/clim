@@ -22,6 +22,7 @@ typedef enum
 	CLIM_EC_WAS_ALREADY_INIT,
 	CLIM_EC_STAT_FAILED,
 	CLIM_EC_FILE_NOT_FOUND,
+	CLIM_EC_UNSUPPORTED_IMAGE_FORMAT,
 	CLIM_EC_UNKNOWN
 } clim_errcode_t;
 
@@ -36,7 +37,7 @@ typedef struct
 static const clim_err_pair s_error_messages[MAX_ERRCODE_CODES] =
 {
 	{ .msg = "No errors occurred (success)",  .code = CLIM_EC_SUCCESS },
-	{ .msg = "Parameters passed are invalid", .code = CLIM_EC_INVALID_PARAMETERS },
+	{ .msg = "Parameters passed are invalid", .code = CLIM_EC_INVALID_PARAMETERS }
 };
 
 static inline const char* clim_err_get_msg(clim_errcode_t errcode)
