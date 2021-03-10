@@ -178,8 +178,8 @@ clim_errcode_t clim_img_write(
 }
 
 void clim_img_copy(
-    const clim_img_ctx_t* restrict pctx_src, 
-    clim_img_ctx_t* restrict pctx_dest,
+	const clim_img_ctx_t* restrict pctx_src, 
+	clim_img_ctx_t* restrict pctx_dest,
 	clim_img_copy_method method
 )
 {
@@ -188,10 +188,42 @@ void clim_img_copy(
 
 	const uint8_t* psrc_pixels = pctx_src->data.pixels;
 	if ((method == CLIM_IMG_COPY_DEEP) && psrc_pixels)
-    {
+	{
 		const size_t len = (size_t)pctx_src->data.width * pctx_src->data.heigth;
 		pctx_dest->data.pixels = clim_mem_dup(
 			psrc_pixels, len * pctx_src->data.bytes_per_pixel
 		);
 	}
+}
+
+clim_errcode_t clim_img_make(
+	const uint32_t img_width,
+	const uint32_t img_height,
+	const uint8_t  bits_per_pixel,
+	clim_img_format_t img_format,
+	clim_img_ctx_t* pctx
+)
+{
+	if (!img_width || !img_height || !bits_per_pixel)
+		return CLIM_EC_INVALID_PARAMETERS;
+
+	if (bits_per_pixel != 24 && bits_per_pixel != 32)
+		return CLIM_EC_UNSUPPORTED_IMAGE_BPP;
+
+	const size_t len = (size_t)(img_width) * img_height;
+	const uint8_t bytes_per_pixel = (bits_per_pixel >> 3U);
+
+	if (pctx)
+	{
+		*pctx = (clim_img_ctx_t)
+		{
+			.data.width = img_width,
+			.data.heigth = img_height,
+			.data.bytes_per_pixel = bytes_per_pixel,
+			.data.pixels = clim_mem_alloc(len * bytes_per_pixel, true),
+			.format = img_format,
+		};
+	}
+
+	return CLIM_EC_SUCCESS;
 }

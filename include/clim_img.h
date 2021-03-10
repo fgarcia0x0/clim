@@ -123,4 +123,13 @@ void clim_img_copy(
 	clim_img_copy_method method
 );
 
+clim_errcode_t clim_img_make(
+	const uint32_t img_width,
+	const uint32_t img_height,
+	const uint8_t  bits_per_pixel,
+	clim_img_format_t img_format,
+	clim_img_ctx_t* pctx
+);
+
+
 #endif
