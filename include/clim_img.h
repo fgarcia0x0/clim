@@ -9,12 +9,22 @@
 
 #include "clim_base.h"
 
+#define CLIM_IMG_MAKE_RGB(r, g, b) 	   ((clim_pixelcolor_t){0xff, r, g, b})
+#define CLIM_IMG_MAKE_ARGB(a, r, g, b) ((clim_pixelcolor_t){a, r, g, b})
+#define CLIM_IMG_MAKE_RGBA(r, g, b, a) ((clim_pixelcolor_t){a, r, g, b})
+
+#define CLIM_IMG_SET_SIZE(ctx, w, h) do { (ctx)->data.width = w, (ctx)->data.heigth = h; } while(0)
+#define CLIM_IMG_SET_BPP(ctx, n) do { (ctx)->data.bytes_per_pixel = n; } while(0)
+#define CLIM_IMG_GET_HEIGTH(ctx) ((ctx)->data.heigth)
+#define CLIM_IMG_GET_WIDTH(ctx) ((ctx)->data.width)
+
 #define CLIM_IMG_SET_PIXEL(ctx, x, y, r, g, b) clim_img_set_pixel_argb(ctx, x, y, CLIM_IMG_MAKE_RGB(r, g, b))
 #define CLIM_IMG_GET_PIXEL(ctx, x, y) clim_img_get_pixel_argb(ctx, x, y)
+#define CLIM_IMG_GET_FORMAT(ctx) ((ctx).format)
 
-static inline clim_argb_t clim_uint32_to_argb(uint32_t color)
+static inline clim_pixelcolor_t clim_uint32_to_argb(uint32_t color)
 {
-	clim_argb_t result = {0};
+	clim_pixelcolor_t result = {0};
 	result.a = (uint8_t)((color >> 24U) & UINT8_MAX);
 	result.r = (uint8_t)((color >> 16U) & UINT8_MAX);
 	result.g = (uint8_t)((color >> 8U)  & UINT8_MAX);
@@ -22,7 +32,7 @@ static inline clim_argb_t clim_uint32_to_argb(uint32_t color)
 	return result;
 }
 
-static inline uint32_t clim_argb_to_uint32(clim_argb_t color)
+static inline uint32_t clim_pixelcolor_to_uint32(clim_pixelcolor_t color)
 {
 	uint32_t result = {0};
 	result |= (uint32_t)((color.a & UINT8_MAX) << 24U);
@@ -33,65 +43,33 @@ static inline uint32_t clim_argb_to_uint32(clim_argb_t color)
 }
 
 /**
- * @brief      set pixel color in image
- *
- * @param      pctx  the image context
- * @param[in]  x     the x coordinate
- * @param[in]  y     the y coordinate
- * @param[in]  a     alpha amount [0, 255]
- * @param[in]  r     red amount [0, 255]
- * @param[in]  g     green amount [0, 255]
- * @param[in]  b     blur amount [0, 255]
- *
- */
-void clim_img_set_pixel(
-	clim_img_ctx_t* pctx, size_t x, size_t y, 
-	uint8_t a, uint8_t r, uint8_t g, uint8_t b
-);
-
-/**
  * @brief      set pixel color on argb format in image
  *
  * @param      pctx   the image context
- * @param[in]  x      the x coordinate
- * @param[in]  y      the y coordinate
+ * @param[in]  xpos   the x coordinate
+ * @param[in]  ypos   the y coordinate
  * @param[in]  color  the new color applied in the pixel position [x, y]
  *
  */
-void clim_img_set_pixel_argb(
+void clim_img_set_pixel(
 	clim_img_ctx_t* pctx, 
-	size_t x, size_t y, 
-	clim_argb_t color
+	size_t xpos, size_t ypos, 
+	clim_pixelcolor_t color
 );
 
 /**
  * @brief      get pixel color of image in ARGB format
  *
  * @param[in]  pctx   pointer to image context
- * @param[in]  x_pos  The x position
- * @param[in]  y_pos  The y position
+ * @param[in]  xpos   The x position
+ * @param[in]  ypos   The y position
  * @see        clim_img_ctx_t
  *
  * @return     pixel color in the position [x, y]
  */
-clim_argb_t clim_img_get_pixel_argb(
+clim_pixelcolor_t clim_img_get_pixel(
 	const clim_img_ctx_t* restrict pctx, 
-	size_t x_pos, size_t y_pos
-);
-
-/**
- * @brief      get pixel color of image in ARGB format
- *
- * @param[in]  pctx   pointer to image context
- * @param[in]  point  an point 2d in space represented by the point2_zu_t
- *                    structure
- * @see        clim_img_ctx_t
- *
- * @return     pixel color in the position [point.x, point.y]
- */
-clim_argb_t clim_img_get_pixel_argb_pntzu(
-	const clim_img_ctx_t* restrict pctx, 
-	clim_point2_zu_t point
+	size_t xpos, size_t ypos
 );
 
 /**

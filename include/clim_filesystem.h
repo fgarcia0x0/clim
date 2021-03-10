@@ -10,6 +10,9 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <errno.h>
+#include "clim_utils.h"
+
+#define MIN(a, b) (((a) < (b)) ? (a) : (b))
 
 static inline bool clim_fs_file_exists(const char* filepath)
 {
@@ -105,13 +108,51 @@ static clim_errcode_t clim_fs_read_entire_file(
 	return errc;
 }
 
-static CLIM_ALWAYS_INLINE char* clim_get_file_extension(const char* filepath)
+static CLIM_ALWAYS_INLINE char* clim_extract_file_extension(const char* filepath)
 {
 	CLIM_ASSERT(filepath);
 
 	char* pext = strrchr(filepath, '.');
 	if (pext && *(pext + 1))
 		return pext + 1;
+
+	return NULL;
+}
+
+static inline char* clim_fs_extract_filepath(
+	const char* restrict path, char* restrict dest, size_t dest_size
+)
+{
+	CLIM_ASSERT(path && dest && dest_size);
+
+	const char* pslash = strrchr(path, CLIM_PATH_SEPERATOR);
+
+	if (pslash)
+	{
+		size_t len = MIN((size_t)(pslash - path), dest_size - 1);
+		(void) clim_strlcpy(dest, path, len);
+		return dest;
+	}
+
+	return NULL;
+}
+
+static inline char* clim_fs_extract_filename(
+	const char* restrict path, char* restrict dest, size_t dest_size
+)
+{
+	CLIM_ASSERT(path && dest && dest_size);
+
+	const char* pslash = strrchr(path, CLIM_PATH_SEPERATOR);
+
+	if (pslash)
+	{
+		if (++pslash)
+		{
+			(void) clim_strlcpy(dest, pslash, dest_size - 1);
+			return dest;
+		}
+	}
 
 	return NULL;
 }

@@ -15,6 +15,13 @@
 	#define _LARGEFILE64_SOURCE
 #endif
 
+#ifdef CLIM_OS_WIN
+	#define CLIM_PATH_SEPERATOR '\\'
+#else
+	#define CLIM_PATH_SEPERATOR '/'
+#endif
+
+
 #include <stddef.h>
 #include "clim_base.h"
 
