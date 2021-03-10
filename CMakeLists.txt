@@ -62,13 +62,13 @@ elseif (CMAKE_COMPILER_IS_CLANG OR CMAKE_COMPILER_IS_CLANG_CL)
 endif()
 
 file(GLOB_RECURSE CLIM_SOURCES RELATIVE ${CMAKE_SOURCE_DIR} "src/*.c")
-file(GLOB_RECURSE CLIM_TEST_SUITE_SOURCES RELATIVE ${CMAKE_SOURCE_DIR} "tests/*.c")
+file(GLOB_RECURSE CLIM_TEST_SUITE_SOURCES RELATIVE ${CMAKE_SOURCE_DIR} "clim_test_main.c")
 
 # add the executable
 add_executable(clim ${CLIM_SOURCES})
 
 # add test executable
-add_executable(clim_test_suite ${CLIM_TEST_SUITE_SOURCES} "src/clim_mem.c" "src/clim_logger.c")
+add_executable(clim_test_suite ${CLIM_TEST_SUITE_SOURCES})
 
 # set c version
 set_target_properties(clim PROPERTIES
