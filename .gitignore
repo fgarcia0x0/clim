@@ -61,5 +61,6 @@ build.bat
 /.vs
 /build_scripts
 /out
+/releases
 *.sublime-project
 *.sublime-workspace
