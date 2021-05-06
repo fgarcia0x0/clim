@@ -1,12 +1,12 @@
 #ifndef CLIM_BASE_H
 #define CLIM_BASE_H
 
-#include "clim_platform_detector.h"
-
 #include <stdio.h>
 #include <stdint.h>
 #include <assert.h>
 #include <stdbool.h>
+
+#include "clim_platform_detector.h"
 
 #ifndef CLIM_COMPILER_MSVC
 	#include <stdnoreturn.h>
@@ -28,11 +28,7 @@
 
 #define CLIM_PRINT_ERRC(__errc) fprintf(stderr, "%s\n", clim_err_get_msg(__errc))
 #define CLIM_GET_ERR_FMT(errc) "%s", clim_err_get_msg(errc)
-
-#ifdef CLIM_OS_WIN
-	#define CLIM_WIN_UTF8_CODEPAGE 65001
-    extern int __stdcall SetConsoleOutputCP(unsigned wCodePageID);
-#endif
+#define CLIM_STRINGFY(x) #x
 
 typedef unsigned char char8_t;
 #define U8(str) (const char8_t *)(str)
@@ -40,11 +36,11 @@ typedef unsigned char char8_t;
 typedef enum
 {
 	CLIM_IMAGE_FORMAT_UNKNOWN = 0x00000000,
-	CLIM_IMAGE_FORMAT_BITMAP,
+	CLIM_IMAGE_FORMAT_BMP,
 	CLIM_IMAGE_FORMAT_PGM,
 	CLIM_IMAGE_FORMAT_PPM,
 	CLIM_IMAGE_FORMAT_PBM,
-	CLIM_IMAGE_FORMAT_JPEG,
+	CLIM_IMAGE_FORMAT_JPG,
 	CLIM_IMAGE_FORMAT_PNG,
 } clim_img_format_t;
 
@@ -76,16 +72,24 @@ CLIM_MAKE_POINT_STRUCT(point2_zu_t, size_t, x, y)
 
 typedef struct
 {
-	uint8_t a;
-	uint8_t r;
-	uint8_t g;
-	uint8_t b;
+	union
+	{
+		struct 
+		{
+			uint8_t a;
+			uint8_t r;
+			uint8_t g;
+			uint8_t b;
+		};
+		uint32_t native;
+	};
+
 } clim_pixelcolor_t;
 
 typedef struct
 {
 	uint32_t width;
-	uint32_t heigth;
+	uint32_t height;
 	uint8_t* pixels;
 	uint8_t  bytes_per_pixel;
 	void* reserved;

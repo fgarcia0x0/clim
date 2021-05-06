@@ -5,7 +5,6 @@
 
 #ifdef CLIM_COMPILER_MSVC
 	#pragma once
-	#define _CRT_SECURE_NO_WARNINGS
 #endif
 
 #include <stdio.h>
@@ -64,7 +63,7 @@ typedef enum
 	CLIM_LOG_LEVEL_CRITICAL
 } clim_log_level;
 
-// TODO: needed a mutex to run in different threads
+// TODO (Garcia): needed a mutex to run in different threads
 static CLIM_THREAD_LOCAL char g_log_filepath[CLIM_MAX_OS_PATH] = {0};
 static CLIM_THREAD_LOCAL FILE* g_file_handle = NULL;
 
@@ -170,6 +169,10 @@ static void clim_log_write(
 	if (have_extra_info)
 	{
 		filename = strrchr(file, CLIM_PATH_SEPERATOR);
+
+		// BUG BUG
+		if (!filename)
+			filename = strrchr(file, '/');
 
 		CLIM_ASSERT(filename);
 		filename++;
