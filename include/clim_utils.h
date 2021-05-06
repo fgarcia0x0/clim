@@ -63,6 +63,22 @@ typedef union clim_ptr_cast_u
 	size_t* szptr;
 } clim_ptr_cast_t;
 
+#define CLIM_MAX_ONE_BYTE_UTF8   0x007f // ASCII
+#define CLIM_MAX_TWO_BYTE_UTF8   0x07ff
+#define CLIM_MAX_THREE_BYTE_UTF8 0xFFFF
+#define CLIM_MAX_FOUR_BYTE_UTF8  0x10FFFF
+
+#define CLIM_JPG_SIGNATURE U8("\xFF\xD8\xFF\xE0\xFF\xD8\xFF\xE1\xFF\xD8\xFF\xE2\xFF\xD8\xFF\xE3\xFF\xD8\xFF\xE8")
+#define CLIM_PNG_SIGNATURE U8("\x89\x50\x4E\x47\x0D\x0A\x1A\x0A")
+#define CLIM_BMP_SIGNATURE U8("\x42\x4D")
+#define CLIM_PGM_SIGNATURE U8("\x50\x32\x0A")
+#define CLIM_PPM_SIGNATURE U8("\x50\x33\x0A")
+#define CLIM_PBM_SIGNATURE U8("\x50\x31\x0A")
+
+typedef int(*clim_compare_predicate)(const void*, const void*);
+typedef int(*clim_compare_string_predicate)(const char*, const char*);
+typedef char* (*clim_search_predicate)(const char* s1, const char* s2);
+
 static inline uint32_t clim_alpha_blend_pixels(
 	const uint32_t p1, const uint32_t p2
 )

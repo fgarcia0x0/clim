@@ -48,12 +48,17 @@ if (WIN32)
 	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 endif()
 
+if (CMAKE_BUILD_TYPE MATCHES Release)
+  message("Compiling in Release Mode")
+  add_compile_options(-DNDEBUG)
+endif()
+
 if (CMAKE_COMPILER_IS_MSVC)
 	message(STATUS "Generating MSVC Additional Arguments")
 	add_compile_options(/W4 /MP /utf-8)
 
 elseif (CMAKE_COMPILER_IS_GCC)
-	message(STATUS "Generating GCC Additional Arguments")
+  message(STATUS "Generating GCC Additional Arguments")
 
 	add_compile_options(-Wall -Wno-sign-conversion -Wextra -Wpedantic -Wno-unused-parameter -Wno-unused-function -Wdouble-promotion -Wformat-overflow -Wformat-security -Wnull-dereference -Wmisleading-indentation -Wconversion -Wshadow -funsafe-loop-optimizations -Wunsafe-loop-optimizations -Wcast-qual -Wcast-align -Waddress -D__USE_MINGW_ANSI_STDIO=1)
 	if (${CMAKE_C_COMPILER_VERSION} VERSION_GREATER_EQUAL 10.0)
