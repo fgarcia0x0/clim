@@ -74,7 +74,6 @@ static clim_errcode_t clim_fs_read_entire_file(
 	if (CLIM_FAILED(errc))
 		return errc;
 
-	void* raw_buffer = clim_mem_alloc(file_len, false);
 	FILE* fileptr = fopen(filepath, "rb");
 
 	if (!fileptr)
@@ -85,6 +84,8 @@ static clim_errcode_t clim_fs_read_entire_file(
 			return CLIM_EC_CANNOT_CLOSE_FILE;
 		return CLIM_EC_CANNOT_OPEN_FILE;
 	}
+
+	void* raw_buffer = clim_mem_alloc(file_len, false);
 
 	// read buffer
 	if (fread(raw_buffer, file_len, sizeof(uint8_t), fileptr) != sizeof(uint8_t))

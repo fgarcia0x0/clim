@@ -11,11 +11,15 @@
 #include <uchar.h>
 #include <string.h>
 #include <limits.h>
+#include <errno.h>
+#include <ctype.h>
 
 #include "clim_base.h"
 #ifdef CLIM_DEBUG_MODE
 	#include "clim_logger.h"
 #endif
+
+#include "clim_err_handle.h"
 
 #ifdef CLIM_HAVE_MEMMEM
 	#define CLIM_MEMMEM(h, hl, n, nl) (memmem((h), (hl), (n), (nl)))
@@ -24,6 +28,40 @@
 #endif
 
 #define CLIM_MEMMEM_REV(h, hl, n, nl) (clim_mem_search_rev((h), (hl), (n), (nl)))
+#define CLIM_CONTAINS(key, ...) \
+	clim_contains(CLIM_ARGS_LIST(__VA_ARGS__), CLIM_ARGS_NUM(__VA_ARGS__), (key), strcmp)
+
+#define CLIM_MAX_ONE_BYTE_UTF8   0x007f // ASCII
+#define CLIM_MAX_TWO_BYTE_UTF8   0x07ff
+#define CLIM_MAX_THREE_BYTE_UTF8 0xFFFF
+#define CLIM_MAX_FOUR_BYTE_UTF8  0x10FFFF
+
+#define CLIM_JPG_SIGNATURE U8("\xFF\xD8\xFF\xE0\xFF\xD8\xFF\xE1\xFF\xD8\xFF\xE2\xFF\xD8\xFF\xE3\xFF\xD8\xFF\xE8")
+#define CLIM_PNG_SIGNATURE U8("\x89\x50\x4E\x47\x0D\x0A\x1A\x0A")
+#define CLIM_BMP_SIGNATURE U8("\x42\x4D")
+#define CLIM_PGM_SIGNATURE U8("\x50\x32\x0A")
+#define CLIM_PPM_SIGNATURE U8("\x50\x33\x0A")
+#define CLIM_PBM_SIGNATURE U8("\x50\x31\x0A")
+
+#define CLIM_ARRAY_SIZE(arr) (sizeof((arr)) / sizeof(*(arr)))
+
+typedef int(*clim_compare_predicate)(const void*, const void*);
+typedef int(*clim_compare_string_predicate)(const char* s1, const char* s2);
+typedef char* (*clim_search_predicate)(const char* s1, const char* s2);
+
+typedef union clim_ptr_cast_u
+{
+	void* ptr;
+	uint8_t* u8ptr;
+	uint16_t* u16ptr;
+	uint32_t* u32ptr;
+	uint64_t* u64ptr;
+	int8_t* i8ptr;
+	int16_t* i16ptr;
+	int32_t* i32ptr;
+	int64_t* i64ptr;
+	size_t* szptr;
+} clim_ptr_cast_t;
 
 #define CLIM_MAX_ONE_BYTE_UTF8   0x007f // ASCII
 #define CLIM_MAX_TWO_BYTE_UTF8   0x07ff
@@ -60,43 +98,43 @@ static inline uint32_t clim_alpha_blend_pixels(
 static inline size_t clim_get_utf8_encode_len(const char16_t* pstr16)
 {
 	CLIM_ASSERT(pstr16);
-    size_t count = 0;
+	size_t count = 0;
 
-    for (const char16_t* p = pstr16; *p; ++p)
-    {
-        if (*p <= CLIM_MAX_ONE_BYTE_UTF8)
-            ++count;
-        else if (*p <= CLIM_MAX_TWO_BYTE_UTF8)
-            count += 2;
-        else if (*p < CLIM_MAX_THREE_BYTE_UTF8)
+	for (const char16_t* p = pstr16; *p; ++p)
+	{
+		if (*p <= CLIM_MAX_ONE_BYTE_UTF8)
+			++count;
+		else if (*p <= CLIM_MAX_TWO_BYTE_UTF8)
+			count += 2;
+		else if (*p < CLIM_MAX_THREE_BYTE_UTF8)
 			count += 3;
 		else
 			break;
-    }
+	}
 
-    return count;
+	return count;
 }
 
 static inline size_t clim_get_utf8_encode_len_32(const char32_t* pstr32)
 {
 	CLIM_ASSERT(pstr32);
-    size_t count = 0;
+	size_t count = 0;
 
-    for (const char32_t* p = pstr32; *p; ++p)
-    {
-        if (*p <= CLIM_MAX_ONE_BYTE_UTF8)
-            ++count;
-        else if (*p <= CLIM_MAX_TWO_BYTE_UTF8)
-            count += 2;
-        else if (*p <= CLIM_MAX_THREE_BYTE_UTF8)
+	for (const char32_t* p = pstr32; *p; ++p)
+	{
+		if (*p <= CLIM_MAX_ONE_BYTE_UTF8)
+			++count;
+		else if (*p <= CLIM_MAX_TWO_BYTE_UTF8)
+			count += 2;
+		else if (*p <= CLIM_MAX_THREE_BYTE_UTF8)
 			count += 3;
 		else if (*p <= CLIM_MAX_FOUR_BYTE_UTF8)
 			count += 4;
 		else
 			break;
-    }
+	}
 
-    return count;
+	return count;
 }
 
 static inline size_t clim_strlen16(const char16_t* pstr16)
@@ -267,8 +305,8 @@ static const void* clim_mem_search(
 	if (!needle_len || haystack == needle)
 		return haystack;
 
-	const uint8_t* hptr = (const uint8_t*)haystack;
-	const uint8_t* nptr = (const uint8_t*)needle;
+	const uint8_t* hptr = (const uint8_t *) haystack;
+	const uint8_t* nptr = (const uint8_t *) needle;
 
 	for (; haystack_len >= needle_len; ++hptr, --haystack_len)
 	{
@@ -291,8 +329,8 @@ static const void* clim_mem_search_rev(
 	if (!needle_len || haystack == needle)
 		return haystack;
 
-	const uint8_t* hptr = (const uint8_t*)(haystack)+haystack_len - needle_len;
-	const uint8_t* nptr = (const uint8_t*)needle;
+	const uint8_t* hptr = (const uint8_t *)(haystack)+haystack_len - needle_len;
+	const uint8_t* nptr = (const uint8_t *)needle;
 
 	for (; haystack_len >= needle_len; --hptr, --haystack_len)
 	{
@@ -333,28 +371,30 @@ static inline size_t clim_strlcat(
 {
 	CLIM_ASSERT(dest && src && dest_size);
 	size_t sz = clim_strnlen(dest, dest_size);
+
 	if (sz == dest_size) 
-        return sz + strlen(src);
+		return sz + strlen(src);
+		
 	return sz + clim_strlcpy(dest + sz, src, dest_size - sz);
 }
 
 static inline void* clim_mem_dup(const void* ptr, size_t sz) 
 {
 	CLIM_ASSERT(ptr && sz);
-    void* dest = clim_mem_alloc(sz, false);
-    return memcpy(dest, ptr, sz);
+	void* dest = clim_mem_alloc(sz, false);
+	return memcpy(dest, ptr, sz);
 }
 
 static inline void* clim_mem_dup_n(
-    const void* ptr, 
-    size_t copy_sz, 
-    size_t alloc_sz
+	const void* ptr, 
+	size_t copy_sz, 
+	size_t alloc_sz
 )
 {
 	CLIM_ASSERT(ptr && copy_sz && alloc_sz);
-    void* dest = clim_mem_alloc(alloc_sz, true);
-    const size_t sz = (alloc_sz < copy_sz) ? alloc_sz : copy_sz;
-    return memcpy(dest, ptr, sz);
+	void* dest = clim_mem_alloc(alloc_sz, true);
+	const size_t sz = (alloc_sz < copy_sz) ? alloc_sz : copy_sz;
+	return memcpy(dest, ptr, sz);
 }
 
 static inline char* clim_strdup(const char* pstr)
@@ -458,42 +498,43 @@ static inline void clim_print_hex_bytes_ext(
 	size_t len, bool lowercase
 )
 {
-	CLIM_ASSERT(stream && buffer && len);
-
 	// cast is necessary for c++ compatibility
 	for (const uint8_t* pbuffer = (const uint8_t *)buffer; pbuffer && len--; ++pbuffer)
-		(void) fprintf(stream, lowercase ? "%#x " : "%#X ", *pbuffer);
+		fprintf(stream, lowercase ? "%#x " : "%#X ", *pbuffer);
 
-	(void) putchar('\n');
+	putchar('\n');
 }
 
 static CLIM_ALWAYS_INLINE void clim_print_hex_bytes(const void* buffer, size_t len)
 {
+	CLIM_ASSERT(buffer && len);
 	clim_print_hex_bytes_ext(stdout, buffer, len, false);
 }
 
-static clim_img_format_t clim_get_img_format(FILE* img_handle)
+static clim_img_format_t clim_get_img_format(const uint8_t* mem, const size_t mem_size)
 {
-	/*	
+	/*
 	 *					[MAGIC FILES SIGNATURE]
-	 * 
+	 *
 	 * [PNG]: 89 50 4E 47 0D 0A 1A 0A
 	 * [BMP]: 42 4D
 	 * [PPM]: 50 33 0A
 	 * [PGM]: 50 32 0A
 	 * [PBM]: 50 31 0A
 	 * [JPG]: FF D8 FF E0 or FF D8 FF E1 or FF D8 FF E2 or FF D8 FF E3 or FF D8 FF E8
-	 * 
+	 *
 	 */
 
 	enum { MAX_SIG_LEN = 9, JPEG_SIGS_LEN = 20 };
 
-	uint8_t signature[MAX_SIG_LEN] = { 0 };
-	if (fread(signature, MAX_SIG_LEN - 1, sizeof(uint8_t), img_handle) != sizeof(uint8_t))
+	if (mem_size < MAX_SIG_LEN)
 		return CLIM_IMAGE_FORMAT_UNKNOWN;
 
+	uint8_t signature[MAX_SIG_LEN] = { 0 };
+	memcpy(signature, mem, MAX_SIG_LEN - 1);
+
 	if (!memcmp(signature, CLIM_BMP_SIGNATURE, 2))
-		return CLIM_IMAGE_FORMAT_BITMAP;
+		return CLIM_IMAGE_FORMAT_BMP;
 	else if (!memcmp(signature, CLIM_PGM_SIGNATURE, 3))
 		return CLIM_IMAGE_FORMAT_PGM;
 	else if (!memcmp(signature, CLIM_PPM_SIGNATURE, 3))
@@ -502,8 +543,8 @@ static clim_img_format_t clim_get_img_format(FILE* img_handle)
 		return CLIM_IMAGE_FORMAT_PBM;
 	else if (!memcmp(signature, CLIM_PNG_SIGNATURE, 8))
 		return CLIM_IMAGE_FORMAT_PNG;
-	else if (clim_mem_search(CLIM_JPG_SIGNATURE, JPEG_SIGS_LEN, signature, 4))
-		return CLIM_IMAGE_FORMAT_JPEG;
+	else if (clim_mem_search(CLIM_JPG_SIGNATURE, JPEG_SIGS_LEN, signature, 4U))
+		return CLIM_IMAGE_FORMAT_JPG;
 	else
 		return CLIM_IMAGE_FORMAT_UNKNOWN;
 }
@@ -520,7 +561,6 @@ static inline void clim_fclose(FILE* restrict fileptr)
 		(void) fclose(fileptr);
 	#endif
 }
-
 
 static char** clim_split_str_ex(
 	const char* text, const char* delimiter, 
@@ -559,12 +599,203 @@ static char** clim_split_str_ex(
 }
 
 static inline char** clim_split_str(
-	const char* text, const char* delimiter,size_t* pout_nelem
+	const char* text, const char* delimiter, size_t* pout_nelem
 )
 {
-	CLIM_ASSERT(text && delimiter && search_fn);
+	CLIM_ASSERT(text && delimiter);
 	CLIM_ASSERT(*text && *delimiter);
 	return clim_split_str_ex(text, delimiter, pout_nelem, strstr);
+}
+
+static void clim_skip_chars(char* text, const char* chars)
+{
+	CLIM_ASSERT(text && chars);
+
+	char* temp = text;
+	do
+	{
+		while (*temp && strchr(chars, *temp))
+			++temp;
+	} while ((*text++ = *temp++));
+}
+
+static size_t clim_str_count_if(const char* begin, const char* end, int(*pred)(int c))
+{
+	CLIM_ASSERT(begin && end && pred);
+
+	size_t cnt = 0;
+
+	for (; begin < end; ++begin)
+	{
+		if (pred((int)(unsigned)(*begin)))
+			++cnt;
+	}
+
+	return cnt;
+}
+
+static inline void clim_swap(void* first, void* last)
+{
+	CLIM_ASSERT(first && last);
+
+	clim_ptr_cast_t ufirst = { first };
+	clim_ptr_cast_t ulast  = { last };
+
+	uint8_t t = *(ufirst.u8ptr);
+	*(ufirst.u8ptr) = *(ulast.u8ptr);
+	*(ulast.u8ptr) = t;
+}
+
+static void* clim_mem_rev(void* mem_begin, void* mem_end)
+{
+	CLIM_ASSERT(mem_begin && mem_end);
+
+	uint8_t* begin = (uint8_t *) mem_begin;
+	uint8_t* end   = (uint8_t *) mem_end;
+
+	for (; begin < end; ++begin, --end)
+		clim_swap(begin, end);
+
+	return mem_begin;
+}
+
+static void* clim_mem_rev_copy(void* mem_begin, void* mem_end)
+{
+	CLIM_ASSERT(mem_begin && mem_end);
+
+	uint8_t* begin = (uint8_t *) mem_begin;
+	uint8_t* end   = (uint8_t *) mem_end;
+
+	size_t maxlen = (size_t)(end - begin) + 1U;
+	uint8_t* new_mem = (uint8_t *) clim_mem_dup(mem_begin, maxlen);
+
+	return clim_mem_rev(new_mem, new_mem + maxlen - 1U);
+}
+
+static inline char* clim_str_rev(char* str_begin, char* str_end)
+{
+	CLIM_ASSERT(str_begin && str_end);
+	return clim_mem_rev(str_begin, str_end - 1);
+}
+
+static inline char* clim_str_rev_copy(char* str_begin, char* str_end)
+{
+	CLIM_ASSERT(str_begin && str_end);
+
+	const size_t len = (size_t)(str_end - str_begin);
+
+	char* new_str = clim_strndup(new_str, len);
+	return clim_mem_rev(new_str, new_str + len - 1U);
+}
+
+static bool clim_contains(const char** input, 
+						  const size_t input_size, const char* key,
+						  clim_compare_string_predicate fn_compare)
+{
+	const char** input_begin = input;
+	const char** input_end = input + input_size;
+
+	for (; input_begin < input_end; ++input_begin)
+	{
+		if (!fn_compare(*input_begin, key))
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
+static clim_errcode_t clim_to_u8(const char* text, int base, uint8_t* pout_number)
+{
+	if (!text || !*text)
+		return CLIM_EC_INVALID_PARAMETERS;
+
+	char* endptr = NULL;
+	errno = 0;
+	unsigned long temp = strtoul(text, &endptr, base);
+
+	if (((temp == ULONG_MAX) && (errno == ERANGE)) || (temp > UINT8_MAX))
+		return CLIM_EC_NUMBER_OVERFLOW;
+
+	if (text == endptr)
+		return CLIM_EC_NUMBER_CONVERSION_ERROR;
+
+	*pout_number = (uint8_t)(temp & UINT8_MAX);
+	return CLIM_EC_SUCCESS;
+}
+
+static clim_errcode_t clim_to_u32(const char* text, int base, uint32_t* pout_number)
+{
+	if (!text || !*text)
+		return CLIM_EC_INVALID_PARAMETERS;
+
+	char* endptr = NULL;
+	errno = 0;
+	unsigned long temp = strtoul(text, &endptr, base);
+
+	if (((temp == ULONG_MAX) && (errno == ERANGE)) || (temp > UINT32_MAX))
+		return CLIM_EC_NUMBER_OVERFLOW;
+
+	if (text == endptr)
+		return CLIM_EC_NUMBER_CONVERSION_ERROR;
+
+	*pout_number = (uint32_t)(temp);
+	return CLIM_EC_SUCCESS;
+}
+
+static clim_errcode_t clim_to_u64(const char* text, int base, uint64_t* pout_number)
+{
+	if (!text || !*text)
+		return CLIM_EC_INVALID_PARAMETERS;
+
+	char* endptr = NULL;
+	errno = 0;
+	unsigned long long temp = strtoull(text, &endptr, base);
+
+	if ((temp == ULLONG_MAX) && (errno == ERANGE))
+		return CLIM_EC_NUMBER_OVERFLOW;
+
+	if (text == endptr)
+		return CLIM_EC_NUMBER_CONVERSION_ERROR;
+
+	*pout_number = (uint64_t)(temp);
+	return CLIM_EC_SUCCESS;
+}
+
+static inline const char* clim_next_digit(const char* str)
+{
+	return strpbrk(str, "0123456789");
+}
+
+static const char* clim_next_non_digit(const char* str)
+{
+	const char* beg = str;
+	const char* end = beg + strlen(beg);
+
+	for (; beg < end; ++beg)
+		if (!isdigit(*beg))
+			return beg;
+
+	return NULL;
+}
+
+static void clim_bgr2rgb(uint8_t* pixel_data_begin, 
+						 uint8_t  max_pixel_size, 
+						 uint8_t* pixel_data_end)
+{
+	CLIM_ASSERT(pixel_data_begin && max_pixel_size && pixel_data_end);
+
+	uint8_t* pbegin = pixel_data_begin;
+	uint8_t* pend = pixel_data_end;
+
+	for (; pbegin < pend; pbegin += max_pixel_size)
+		clim_mem_rev(pbegin, pbegin + max_pixel_size - 1U);
+}
+
+static inline uint32_t min_u32(uint32_t a, uint32_t b)
+{
+	return (a < b) ? (a) : (b);
 }
 
 #endif

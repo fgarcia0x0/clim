@@ -41,7 +41,11 @@ static void* clim_mem_alloc(const size_t nbytes, bool clear)
 static void clim_mem_release(void* mem)
 {
 	if (!mem)
-		CLIM_LOG_WARN("trying release null pointer");
+	{
+		#ifdef CLIM_DEBUG_MODE
+			CLIM_LOG_WARN("trying release null pointer");
+		#endif
+	}
 	CLIM_DEFAULT_DEALLOCATOR(mem);
 }
 
